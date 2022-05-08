@@ -1,6 +1,9 @@
 {
   "version": 2,
   "projects": {
-    "planner-api": "apps/planner-api"
+    "budget-domain": "libs/budget-domain",
+    "planner-api": "apps/planner-api",
+    "planner-web": "apps/planner-web",
+    "planner-web-e2e": "apps/planner-web-e2e"
   }
 }

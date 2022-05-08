@@ -1,0 +1,83 @@
+{
+  "sourceRoot": "apps/planner-web/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/web:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "babel",
+        "outputPath": "dist/apps/planner-web",
+        "index": "apps/planner-web/src/index.html",
+        "baseHref": "/",
+        "main": "apps/planner-web/src/main.tsx",
+        "polyfills": "apps/planner-web/src/polyfills.ts",
+        "tsConfig": "apps/planner-web/tsconfig.app.json",
+        "assets": [
+          "apps/planner-web/src/favicon.ico",
+          "apps/planner-web/src/assets"
+        ],
+        "styles": [],
+        "scripts": [],
+        "webpackConfig": "@nrwl/react/plugins/webpack"
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/planner-web/src/environments/environment.ts",
+              "with": "apps/planner-web/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/web:dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "planner-web:build",
+        "hmr": true,
+        "proxyConfig": "apps/planner-web/proxy.conf.json"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "planner-web:build:development"
+        },
+        "production": {
+          "buildTarget": "planner-web:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/planner-web/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/planner-web"],
+      "options": {
+        "jestConfig": "apps/planner-web/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
