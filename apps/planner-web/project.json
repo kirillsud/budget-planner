@@ -50,8 +50,7 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "planner-web:build",
-        "hmr": true,
-        "proxyConfig": "apps/planner-web/proxy.conf.json"
+        "hmr": true
       },
       "configurations": {
         "development": {
