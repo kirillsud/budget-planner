@@ -1,19 +1,23 @@
-import { Navigate, Route, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, Location } from 'react-router-dom';
 import { useAuth } from '../utils/auth';
 
-export interface ProtectedRouteProps {
-  element: JSX.Element;
+export interface RedirectRouteState {
+  from: Location;
 }
 
-export function ProtectedRoute({ element }: ProtectedRouteProps) {
+/* eslint-disable-next-line */
+export interface ProtectedRouteProps {
+}
+
+export function ProtectedRoute(props: ProtectedRouteProps) {
   const auth = useAuth();
   const location = useLocation();
 
   if (!auth) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location } as RedirectRouteState} replace />;
   }
 
-  return element;
+  return <Outlet/>;
 }
 
 export default ProtectedRoute;

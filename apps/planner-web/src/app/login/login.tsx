@@ -2,14 +2,13 @@ import { useState } from 'react';
 import { AuthToken } from '../utils/auth';
 import { API_URL } from '../utils/rest-api';
 
-/* eslint-disable-next-line */
 export interface LoginProps {
-  onAuth(token: AuthToken): void;
+  onLogin(token: AuthToken): void;
 }
 
 export function Login(props: LoginProps) {
-  const [authEmail, setAuthEmail] = useState<string>();
-  const [authPassword, setAuthPassword] = useState<string>();
+  const [authEmail, setAuthEmail] = useState<string>('');
+  const [authPassword, setAuthPassword] = useState<string>('');
 
   async function login() {
     const data = await fetch(`${API_URL}/auth/login`, {
@@ -26,7 +25,7 @@ export function Login(props: LoginProps) {
     setAuthEmail('');
     setAuthPassword('');
 
-    props.onAuth(data.jwt);
+    props.onLogin(data.jwt);
   }
 
   return (
