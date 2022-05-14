@@ -6,6 +6,7 @@ import { auth, AuthRequest } from './app/middleware/auth';
 import { generateJwt } from './app/utils/jwt';
 import { HttpError } from './app/errors/http.error';
 import { LegacyApi } from './app/utils/legacy-api';
+import { catchAsync } from './app/utils/express';
 
 const {
   PORT = 3333,
@@ -29,29 +30,29 @@ app.get('/api/ping', async (req, res) => {
   res.send('Server works!');
 });
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', catchAsync(async (req, res) => {
   const token = await legacyApi.login(req.body.email, req.body.password, req.body.remember);
   const jwt = generateJwt(token);
 
   res.send({ jwt });
-});
+}));
 
-app.get('/api/auth/logout', auth, async (req: AuthRequest, res) => {
+app.get('/api/auth/logout', auth, catchAsync(async (req: AuthRequest, res) => {
   await legacyApi.logout(req.auth);
   res.send();
-});
+}));
 
-app.get('/api/income', auth, async (req: AuthRequest, res) => {
+app.get('/api/income', auth, catchAsync(async (req: AuthRequest, res) => {
   const expenses: BudgetRecord[] = await legacyApi.getIncomes(req.auth);
   res.send(expenses);
-});
+}));
 
-app.get('/api/expense', auth, async (req: AuthRequest, res) => {
+app.get('/api/expense', auth, catchAsync(async (req: AuthRequest, res) => {
   const expenses: BudgetRecord[] = await legacyApi.getExpenses(req.auth);
   res.send(expenses);
-});
+}));
 
-app.use((error: unknown | HttpError, res, next) => {
+app.use((error: unknown | HttpError, _req, res, next) => {
   const statusCode = error instanceof HttpError ? error.statusCode : 500;
   const message = error instanceof Error ? error.message : error.toString();
 
@@ -59,7 +60,7 @@ app.use((error: unknown | HttpError, res, next) => {
 
   res
     .status(statusCode)
-    .send({message});
+    .send({ message });
 
   next();
 });

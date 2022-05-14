@@ -32,10 +32,15 @@ export class LegacyApi {
   }
 
   async login(email: string, password: string, remember: boolean): Promise<AuthToken> {
-    const { data } = await axios.postForm<AuthToken | number>(`${this.url}/auth.php`, { email, password, remember });
+    const { data } = await axios.postForm<AuthToken | number>(`${this.url}/auth.php`, {
+      email,
+      password,
+      remember: remember ? 'on' : 'off',
+    });
 
     if (typeof data === 'number') {
-      throw new AuthorizationError();
+      const message = data === -3 ? 'Invalid email or password' : undefined;
+      throw new AuthorizationError(message);
     }
 
     return data;
@@ -89,24 +94,24 @@ export class LegacyApi {
   }
 
   private convertApiRecordToPublic(value: ApiIncome | ApiGoal, type: BudgetRecord['type']): BudgetRecord {
-    let dateFrom: Date;
+    let dateFrom: number | undefined;
+    let dateTo: number | undefined;
 
     if ('date_from' in value) {
-      dateFrom = this.timestampToDate(value.date_from);
+      dateFrom = value.date_from;
+    }
+
+    if ('date_to' in value) {
+      dateTo = value.date_to;
     }
 
     if ('date' in value) {
-      dateFrom = this.timestampToDate(value.date);
+      dateFrom = value.date;
+      dateTo = value.date;
     }
 
-    if (!dateFrom) {
+    if (!dateFrom || !dateTo) {
       throw new Error('Date is not defined');
-    }
-
-    let dateTo: Date | undefined;
-
-    if ('date_to' in value) {
-      dateTo = this.timestampToDate(value.date_to);
     }
 
     return {
