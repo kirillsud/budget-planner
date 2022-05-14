@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react';
 
-import Home from './home';
+import BudgetList from './budget-list';
 
 describe('Home', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<Home />);
+    const { baseElement } = render(<BudgetList />);
     expect(baseElement).toBeTruthy();
   });
 });

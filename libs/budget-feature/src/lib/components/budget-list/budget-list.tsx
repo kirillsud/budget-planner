@@ -1,22 +1,24 @@
-import { BudgetRecord, parseRecordsFromJson } from '@planner/budget-domain';
-import { useContext, useState } from 'react';
-import { useEffectAsync } from '../utils/react';
-import { AuthContext } from '../utils/auth';
-import { API_URL } from '../utils/rest-api';
-import styles from './home.module.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { BudgetRecord } from '@planner/budget-domain';
+import { selectAuthToken } from '@planner/auth-feature';
+import { config, useEffectAsync } from '@planner/core-web';
+import { budgetActions, selectAllExpenses, selectAllIncomes } from '../../budget.slice';
+import styles from './budget-list.module.css';
+
+const API_URL = config().apiUrl;
 
 /* eslint-disable-next-line */
-export interface HomeProps {}
+export interface BudgetListProps {}
 
-export function Home(props: HomeProps) {
-  const authToken = useContext(AuthContext);
-  
-  const [incomes, setIncomes] = useState<BudgetRecord[]>([]);
-  const [expenses, setExpenses] = useState<BudgetRecord[]>([]);
+export function BudgetList(props: BudgetListProps) {
+  const dispatch = useDispatch();
+  const authToken = useSelector(selectAuthToken);
+  const incomes = useSelector(selectAllIncomes);
+  const expenses = useSelector(selectAllExpenses);
 
   useEffectAsync(async () => {
     if (!authToken) {
-      setIncomes([]);
+      dispatch(budgetActions.removeAll());
       return;
     }
 
@@ -24,16 +26,14 @@ export function Home(props: HomeProps) {
       headers: {
         Authorization: authToken,
       },
-    })
-      .then((_) => _.text())
-      .then(parseRecordsFromJson);
+    }).then((_) => _.json());
 
-    setIncomes(data);
-  }, [authToken]);
+    dispatch(budgetActions.addMany(data));
+  }, [dispatch, authToken]);
 
   useEffectAsync(async () => {
     if (!authToken) {
-      setExpenses([]);
+      dispatch(budgetActions.removeAll());
       return;
     }
 
@@ -41,18 +41,16 @@ export function Home(props: HomeProps) {
       headers: {
         Authorization: authToken,
       },
-    })
-      .then((_) => _.text())
-      .then(parseRecordsFromJson);
+    }).then((_) => _.json());
 
-    setExpenses(data);
+    dispatch(budgetActions.addMany(data));
   }, [authToken]);
 
   function addIncome() {
     fetch(`${API_URL}/income`)
       .then((_) => _.json())
       .then((newIncome) => {
-        setIncomes([...incomes, newIncome]);
+        dispatch(budgetActions.add(newIncome));
       });
   }
 
@@ -63,17 +61,14 @@ export function Home(props: HomeProps) {
     })
       .then((_) => _.json())
       .then((newGoal) => {
-        setIncomes([...incomes, newGoal]);
+        dispatch(budgetActions.add(newGoal));
       });
   }
 
-  const dates: Map<
-    number,
-    { incomes: BudgetRecord[]; expenses: BudgetRecord[] }
-  > = new Map();
+  const dates: Map<number, { incomes: BudgetRecord[]; expenses: BudgetRecord[]}> = new Map();
 
   incomes.forEach((income) => {
-    const key = income.date.from.getTime();
+    const key = income.date.from;
     const date = dates.get(key) ?? { incomes: [], expenses: [] };
 
     date.incomes.push(income);
@@ -81,11 +76,11 @@ export function Home(props: HomeProps) {
     dates.set(key, date);
   });
 
-  expenses.forEach((goal) => {
-    const key = goal.date.from.getTime();
+  expenses.forEach((expense) => {
+    const key = expense.date.from;
     const date = dates.get(key) ?? { incomes: [], expenses: [] };
 
-    date.expenses.push(goal);
+    date.expenses.push(expense);
 
     dates.set(key, date);
   });
@@ -121,4 +116,4 @@ export function Home(props: HomeProps) {
   );
 }
 
-export default Home;
+export default BudgetList;

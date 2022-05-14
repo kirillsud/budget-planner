@@ -1,51 +1,15 @@
-import { useEffect, useState } from 'react';
-import { Route, Routes, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { AuthContext, AuthToken } from './utils/auth';
-import { API_URL } from './utils/rest-api';
-import Home from './home/home';
-import Login from './login/login';
-import ProtectedRoute, { RedirectRouteState } from './protected-route/protected-route';
-
-const authTokenStorageKey = 'authToken';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { Login, selectAuthToken, authLogout } from '@planner/auth-feature';
+import { BudgetList } from '@planner/budget-feature';
+import ProtectedRoute from './protected-route/protected-route';
 
 const App = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  
-  const [authToken, setAuthToken] = useState<AuthToken | undefined>();
-
-  useEffect(() => {
-    const savedToken = localStorage.getItem(authTokenStorageKey);
-
-    if (savedToken) {
-      setAuthToken(savedToken);
-
-      // Use window.location istead of useLocation() because of wrong path on startup
-      if (window.location.pathname === '/login') {
-        navigate('/home');
-      }
-    }
-  }, []);
-
-  function login(token: AuthToken) {
-    setAuthToken(token);
-    localStorage.setItem(authTokenStorageKey, token);
-    navigate((location.state as RedirectRouteState)?.from);
-  }
+  const authToken = useSelector(selectAuthToken);
+  const dispatch = useDispatch();
 
   async function logout() {
-    if (!authToken) {
-      return;
-    }
-
-    await fetch(`${API_URL}/auth/logout`, {
-      headers: {
-        Authorization: authToken,
-      },
-    });
-
-    setAuthToken(undefined);
-    localStorage.removeItem(authTokenStorageKey);
+    dispatch(authLogout() as any);
   }
 
   return (
@@ -53,17 +17,14 @@ const App = () => {
       <h1>Планирование бюджета</h1>
       {authToken && <button onClick={logout}>Выйти</button>}
 
-
-      <AuthContext.Provider value={authToken}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/home" />} />
-          <Route path="/home" element={<ProtectedRoute/>}>
-            <Route path="" element={ <Home /> } />
-          </Route>
-          <Route path="/login" element={<Login onLogin={login} />} />
-          <Route path="*" element={"404 :("} />
-        </Routes>
-      </AuthContext.Provider>
+      <Routes>
+        <Route path="/" element={<Navigate to="/home" />} />
+        <Route path="/home" element={<ProtectedRoute />}>
+          <Route path="" element={<BudgetList />} />
+        </Route>
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={'404 :('} />
+      </Routes>
     </>
   );
 };

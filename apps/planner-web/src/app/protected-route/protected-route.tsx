@@ -1,23 +1,20 @@
-import { Navigate, Outlet, useLocation, Location } from 'react-router-dom';
-import { useAuth } from '../utils/auth';
-
-export interface RedirectRouteState {
-  from: Location;
-}
+import { useSelector } from 'react-redux';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { LoginRouteState, selectAuthToken } from '@planner/auth-feature';
 
 /* eslint-disable-next-line */
-export interface ProtectedRouteProps {
-}
+export interface ProtectedRouteProps {}
 
 export function ProtectedRoute(props: ProtectedRouteProps) {
-  const auth = useAuth();
+  const authToken = useSelector(selectAuthToken);
   const location = useLocation();
 
-  if (!auth) {
-    return <Navigate to="/login" state={{ from: location } as RedirectRouteState} replace />;
+  if (!authToken) {
+    const state: LoginRouteState = { from: location.pathname };
+    return <Navigate to="/login" state={state} replace />;
   }
 
-  return <Outlet/>;
+  return <Outlet />;
 }
 
 export default ProtectedRoute;
