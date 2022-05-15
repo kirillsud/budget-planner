@@ -1,10 +1,12 @@
+export type TimestampInMsec = number & { type: 'timestamp-in-msec' };
+
 export interface BudgetRecord {
   type: 'income' | 'expense';
   id: number;
   title: string;
   date: {
-    from: number;
-    to: number;
+    from: TimestampInMsec;
+    to: TimestampInMsec;
   };
   amount: number;
   completed: boolean;

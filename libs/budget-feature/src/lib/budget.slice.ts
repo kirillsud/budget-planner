@@ -1,19 +1,26 @@
+import { selectAuthToken } from '@planner/auth-feature';
 import { BudgetRecord } from '@planner/budget-domain';
+import { config } from '@planner/core-web';
 import {
   createAsyncThunk,
   createEntityAdapter,
   createSelector,
   createSlice,
+  EntityId,
   EntityState,
-  PayloadAction,
+  Update,
 } from '@reduxjs/toolkit';
+
+const { apiUrl } = config();
 
 export const BUDGET_FEATURE_KEY = 'budget';
 
-/*
- * Update these interfaces according to your requirements.
- */
-export type BudgetEntity = BudgetRecord;
+export interface BudgetEntity {
+  id: EntityId;
+  record: BudgetRecord;
+  loadingStatus: 'loading' | 'loaded' | 'error';
+  error?: string;
+}
 
 export interface BudgetState extends EntityState<BudgetEntity> {
   loadingStatus: 'not loaded' | 'loading' | 'loaded' | 'error';
@@ -22,32 +29,63 @@ export interface BudgetState extends EntityState<BudgetEntity> {
 
 export const budgetAdapter = createEntityAdapter<BudgetEntity>();
 
-/**
- * Export an effect using createAsyncThunk from
- * the Redux Toolkit: https://redux-toolkit.js.org/api/createAsyncThunk
- *
- * e.g.
- * ```
- * import React, { useEffect } from 'react';
- * import { useDispatch } from 'react-redux';
- *
- * // ...
- *
- * const dispatch = useDispatch();
- * useEffect(() => {
- *   dispatch(fetchBudget())
- * }, [dispatch]);
- * ```
- */
-export const fetchBudget = createAsyncThunk(
-  'budget/fetchStatus',
+export const fetchBudget = createAsyncThunk<BudgetRecord[]>(
+  'budget/fetchAll',
   async (_, thunkAPI) => {
-    /**
-     * Replace this with your custom fetch call.
-     * For example, `return myApi.getBudgets()`;
-     * Right now we just return an empty array.
-     */
-    return Promise.resolve([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const authToken = selectAuthToken(thunkAPI.getState() as any);
+
+    if (!authToken) {
+      return [];
+    }
+
+    const data = await fetch(`${apiUrl}/budget`, {
+      headers: {
+        Authorization: authToken,
+      },
+    }).then((_) => _.json());
+
+    return data;
+  }
+);
+
+export const updateBudget = createAsyncThunk(
+  'budget/updateOne',
+  async (update: Update<BudgetRecord>, thunkAPI) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const state = thunkAPI.getState() as any;
+    const authToken = selectAuthToken(state);
+    const entity = selectBudgetById(update.id)(state);
+    
+    if (!entity) {
+      throw new Error(`Budget record with id ${update.id} not found`);
+    }
+
+    const { record } = entity;
+
+    if (!authToken) {
+      return record;
+    }
+
+    const response = await fetch(`${apiUrl}/budget/${update.id}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        type: record.type,
+        ...update.changes,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': authToken,
+      },
+    });
+    
+    const data = await response.json();
+
+    if (response.status !== 200) {
+      return thunkAPI.rejectWithValue(data.message);
+    }
+
+    return data as BudgetRecord;
   }
 );
 
@@ -60,7 +98,6 @@ export const budgetSlice = createSlice({
   initialState: initialBudgetState,
   reducers: {
     add: budgetAdapter.addOne,
-    addMany: budgetAdapter.addMany,
     remove: budgetAdapter.removeOne,
     removeAll: budgetAdapter.removeAll,
   },
@@ -69,75 +106,70 @@ export const budgetSlice = createSlice({
       .addCase(fetchBudget.pending, (state: BudgetState) => {
         state.loadingStatus = 'loading';
       })
-      .addCase(
-        fetchBudget.fulfilled,
-        (state: BudgetState, action: PayloadAction<BudgetEntity[]>) => {
-          budgetAdapter.setAll(state, action.payload);
-          state.loadingStatus = 'loaded';
-        }
-      )
-      .addCase(fetchBudget.rejected, (state: BudgetState, action) => {
+      .addCase(fetchBudget.fulfilled, (state, action) => {
+        budgetAdapter.setAll(state, action.payload.map(record => ({
+          id: record.id,
+          record,
+          loadingStatus: 'loaded'
+        })));
+
+        state.loadingStatus = 'loaded';
+      })
+      .addCase(fetchBudget.rejected, (state, action) => {
         state.loadingStatus = 'error';
         state.error = action.error.message ?? '';
+      });
+
+    builder
+      .addCase(updateBudget.pending, (state, action) => {
+        const { id } = action.meta.arg;
+
+        budgetAdapter.updateOne(state, {
+          id,
+          changes: {
+            loadingStatus: 'loading',
+          }
+        });
+      })
+      .addCase(updateBudget.fulfilled, (state, action) => {
+        const record = action.payload;
+
+        budgetAdapter.updateOne(state, {
+          id: record.id,
+          changes: {
+            record,
+            loadingStatus: 'loaded',
+          },
+        });
+      })
+      .addCase(updateBudget.rejected, (state, action) => {
+        const { id } = action.meta.arg;
+
+        budgetAdapter.updateOne(state, {
+          id,
+          changes: {
+            loadingStatus: 'error',
+            error: action.payload as string ?? '',
+          }
+        });
       });
   },
 });
 
-/*
- * Export reducer for store configuration.
- */
 export const budgetReducer = budgetSlice.reducer;
-
-/*
- * Export action creators to be dispatched. For use with the `useDispatch` hook.
- *
- * e.g.
- * ```
- * import React, { useEffect } from 'react';
- * import { useDispatch } from 'react-redux';
- *
- * // ...
- *
- * const dispatch = useDispatch();
- * useEffect(() => {
- *   dispatch(budgetActions.add({ id: 1 }))
- * }, [dispatch]);
- * ```
- *
- * See: https://react-redux.js.org/next/api/hooks#usedispatch
- */
 export const budgetActions = budgetSlice.actions;
 
-/*
- * Export selectors to query state. For use with the `useSelector` hook.
- *
- * e.g.
- * ```
- * import { useSelector } from 'react-redux';
- *
- * // ...
- *
- * const entities = useSelector(selectAllBudget);
- * ```
- *
- * See: https://react-redux.js.org/next/api/hooks#useselector
- */
-const { selectAll, selectEntities } = budgetAdapter.getSelectors();
+const { selectAll, selectEntities, selectById } = budgetAdapter.getSelectors();
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getBudgetState = (rootState: any): BudgetState =>
   rootState[BUDGET_FEATURE_KEY];
 
 export const selectAllBudget = createSelector(getBudgetState, selectAll);
 
-export const selectAllIncomes = createSelector(getBudgetState, (state: BudgetState) => {
-  return selectAll(state).filter(x => x.type === 'income');
-});
+export const selectBudgetEntities = createSelector(getBudgetState, selectEntities);
 
-export const selectAllExpenses = createSelector(getBudgetState, (state: BudgetState) => {
-  return selectAll(state).filter(x => x.type === 'expense');
-});
+export const selectBudgetLoading = createSelector(getBudgetState, x => x.loadingStatus);
 
-export const selectBudgetEntities = createSelector(
-  getBudgetState,
-  selectEntities,
-);
+export const selectBudgetById = (id: EntityId) =>
+  createSelector(getBudgetState, (state) => selectById(state, id));

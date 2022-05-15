@@ -1,6 +1,6 @@
 import { HttpError } from './http.error';
 
-export class AuthorizationError extends HttpError {
+export class HttpAuthorizationError extends HttpError {
   constructor(message = 'Authorization required') {
     super(401, message);
   }

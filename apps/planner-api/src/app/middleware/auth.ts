@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { decodeJwt } from '../utils/jwt';
-import { AuthorizationError } from '../errors/authorization.error';
+import { HttpAuthorizationError } from '../errors/http-authorization.error';
 
 export interface AuthToken {
   series: string;
@@ -17,7 +17,7 @@ export function auth(req: AuthRequest, _res, next) {
   const token = req.headers.authorization;
 
   if (!token) {
-    next(new AuthorizationError());
+    next(new HttpAuthorizationError());
     return;
   }
 
@@ -25,7 +25,7 @@ export function auth(req: AuthRequest, _res, next) {
     const payload = decodeJwt<AuthToken>(token);
     req.auth = payload;
   } catch (err) {
-    next(new AuthorizationError());
+    next(new HttpAuthorizationError());
     return;
   }
 

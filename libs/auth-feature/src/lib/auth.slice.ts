@@ -1,4 +1,6 @@
 import {
+  Action,
+  AnyAction,
   createAsyncThunk,
   createSelector,
   createSlice,
@@ -20,9 +22,15 @@ export interface AuthState {
   error?: string;
 }
 
+export interface LoginParams {
+  email: string;
+  password: string;
+  remember: boolean;
+}
+
 export const authLogin = createAsyncThunk(
   'auth/login',
-  async (authData: {email: string, password: string, remember: boolean}, thunkAPI) => {
+  async (authData: LoginParams, thunkAPI) => {
     const response = await fetch(`${apiUrl}/auth/login`, {
       method: 'post',
       headers: {
@@ -45,6 +53,7 @@ export const authLogin = createAsyncThunk(
 export const authLogout = createAsyncThunk(
   'auth/logout',
   async (_, thunkAPI) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const authToken = selectAuthToken(thunkAPI.getState() as any);
     if (!authToken) {
       return;

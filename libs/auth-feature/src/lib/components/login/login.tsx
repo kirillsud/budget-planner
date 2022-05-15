@@ -1,12 +1,7 @@
-import {
-  authLogin,
-  selectAuthError,
-  selectAuthLoadingStatus,
-  selectAuthToken,
-} from '@planner/auth-feature';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
+import { authLogin, selectAuthError, selectAuthLoadingStatus, selectAuthToken } from '../../auth.slice';
 
 export interface LoginRouteState {
   from: string;
@@ -37,13 +32,13 @@ export function Login(props: LoginProps) {
 
   return (
     <>
-      e-mail:{' '}
+      <label>e-mail:</label>
       <input
         type="text"
         value={email}
         onChange={(evt) => setEmail(evt.target.value)}
       />{' '}
-      пароль:{' '}
+      <label>пароль:</label>
       <input
         type="password"
         value={password}

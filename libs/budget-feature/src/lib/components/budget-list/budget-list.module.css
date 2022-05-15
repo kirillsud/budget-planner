@@ -5,3 +5,7 @@
 .expense {
   color: hsl(0deg 100% 72%);
 }
+
+.menu-button {
+  margin-left: .5rem;
+}
