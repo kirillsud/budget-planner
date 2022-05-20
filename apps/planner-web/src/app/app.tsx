@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { Login, selectAuthToken, authLogout } from '@planner/auth-feature';
-import { BudgetFeature, fetchBudget } from '@planner/budget-feature';
+import { Login, selectAuthToken, authLogout } from '@planner/auth-web';
+import { BudgetFeature, fetchBudget } from '@planner/budget-web';
 import ProtectedRoute from './protected-route/protected-route';
 
 const App = () => {

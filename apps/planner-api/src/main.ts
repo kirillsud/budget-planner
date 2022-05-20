@@ -1,6 +1,6 @@
 import * as express from 'express';
 import * as cors from 'cors';
-import { errors } from 'celebrate';
+import { isCelebrateError } from 'celebrate';
 import { auth } from './app/middleware/auth';
 import { error } from './app/middleware/error';
 import authRouter from './app/routes/auth.routes'
@@ -27,8 +27,6 @@ app.get('/api/ping', async (req, res) => {
 app.use(authRouter);
 
 app.use(auth, budgetRouter);
-
-app.use(errors());
 
 app.use(error);
 

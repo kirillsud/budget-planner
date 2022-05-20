@@ -15,10 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@planner/auth-feature": ["libs/auth-feature/src/index.ts"],
-      "@planner/budget-domain": ["libs/budget-domain/src/index.ts"],
-      "@planner/budget-feature": ["libs/budget-feature/src/index.ts"],
-      "@planner/core-web": ["libs/core-web/src/index.ts"]
+      "@planner/auth-web": ["libs/auth/web/src/index.ts"],
+      "@planner/budget-domain": ["libs/budget/domain/src/index.ts"],
+      "@planner/budget-web": ["libs/budget/web/src/index.ts"],
+      "@planner/common-web": ["libs/common/web/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -1,10 +1,10 @@
 {
   "version": 2,
   "projects": {
-    "auth-feature": "libs/auth-feature",
-    "budget-domain": "libs/budget-domain",
-    "budget-feature": "libs/budget-feature",
-    "core-web": "libs/core-web",
+    "auth-web": "libs/auth/web",
+    "budget-domain": "libs/budget/domain",
+    "budget-web": "libs/budget/web",
+    "common-web": "libs/common/web",
     "planner-api": "apps/planner-api",
     "planner-web": "apps/planner-web",
     "planner-web-e2e": "apps/planner-web-e2e"

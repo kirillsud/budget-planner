@@ -28,6 +28,8 @@ router.post('/api/budget/:id',
         to: Joi.date().required().min(Joi.ref('from')),
       }),
     }),
+  }, {
+    abortEarly: false,
   }),
   catchAsync(async (req: AuthRequest, res) => {
     const id = parseInt(req.params['id']);
@@ -52,6 +54,8 @@ router.put('/api/budget',
         to: Joi.date().required().min(Joi.ref('from')),
       }),
     }),
+  }, {
+    abortEarly: false,
   }),
   catchAsync(async (req: AuthRequest, res) => {
     const data: Omit<BudgetRecord, 'id'> = {

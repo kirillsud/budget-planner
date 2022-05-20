@@ -1,35 +1,53 @@
 import { CelebrateError } from 'celebrate';
-import { ValidationError as JoiValidationError, ValidationErrorItem } from 'joi'
+import { HttpError } from './http.error';
 
-export interface ValidationError {
-  location: 'params' | 'headers' | 'query' | 'cookies' | 'signedCookies' | 'body',
-  param: string;
+type ValidationLocation = 'params' | 'headers' | 'query' | 'cookies' | 'signedCookies' | 'body';
+
+export type ErrorBase = {
+  message: string;
   value: unknown;
-  msg: string;
 }
 
-export class HttpValidationError extends CelebrateError {
+export interface ValidationError extends ErrorBase {
+  location: ValidationLocation,
+  param: string;
+}
+
+export class HttpValidationError extends HttpError {
+
+  public errors: {[location: string]: {[path: string]: ErrorBase}} = {};
+
   constructor(
     errors: ValidationError[],
-    message?: string,
+    message = 'Validation error',
   ) {
-    super(message, { celebrated: true });
-    this.details = new Map();
+    super(400, message);
 
     errors.forEach(error => {
-      const joiError = new JoiValidationError(
-        error.msg,
-        [{
-          message: '',
-          path: error.param.split('.'),
-          context: {
-            value: error.value,
-          }
-        } as ValidationErrorItem],
-        null,
-      );
+      const location = error.location as string;
+      const locationErrors = this.errors[location] ?? {};
 
-      this.details.set(error.location, joiError);
+      locationErrors[error.param] = {
+        message: error.message,
+        value: error.value,
+      };
+
+      this.errors[error.location] = locationErrors;
     });
   }
+}
+
+export function fromCelebrateError(error: CelebrateError): HttpValidationError {
+  const errors: ValidationError[] = [];
+  
+  for (const [segment, joiError] of error.details) {
+    errors.push(...joiError.details.map(detail => ({
+      location: segment as ValidationLocation,
+      param: detail.path.join('.'),
+      value: detail.context.value,
+      message: detail.message,
+    })));
+  }
+
+  return new HttpValidationError(errors);
 }

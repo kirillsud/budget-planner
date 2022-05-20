@@ -219,35 +219,35 @@ function processUpdateError(error: number, record: MakeOptional<BudgetRecord, 'i
       location: 'body',
       param: 'id',
       value: record.id,
-      msg: 'Field "id" is missing or invalid',
+      message: 'Field "id" is missing or invalid',
     }]);
 
     case -2: throw new HttpValidationError([{
       location: 'body',
       param: 'title',
       value: record.title,
-      msg: 'Field "title" is missing or invalid',
+      message: 'Field "title" is missing or invalid',
     }]);
 
     case -3: throw new HttpValidationError([{
       location: 'body',
       param: 'amount',
       value: record.amount,
-      msg: 'Field "amount" is missing or invalid',
+      message: 'Field "amount" is missing or invalid',
     }]);
 
     case -4: throw new HttpValidationError([{
       location: 'body',
       param: 'date.from',
       value: record.date.from,
-      msg: 'Field "date.from" is missing or invalid',
+      message: 'Field "date.from" is missing or invalid',
     }]);
 
     case -5: throw new HttpValidationError([{
       location: 'body',
       param: 'date.to',
       value: record.date.to,
-      msg: 'Field "date.to" is missing or invalid',
+      message: 'Field "date.to" is missing or invalid',
     }]);
 
     case -6: throw new HttpNotFoundError();
@@ -256,7 +256,7 @@ function processUpdateError(error: number, record: MakeOptional<BudgetRecord, 'i
       location: 'body',
       param: 'date.to',
       value: record.date.to,
-      msg: 'Field "date.to" should be greater than "date.from"',
+      message: 'Field "date.to" should be greater than "date.from"',
     }]);
 
     default: throw new Error(`Unknown error code ${error}`);

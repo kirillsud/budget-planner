@@ -1,0 +1,22 @@
+{
+  "sourceRoot": "libs/budget/web/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/budget/web/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/budget/web"],
+      "options": {
+        "jestConfig": "libs/budget/web/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  }
+}

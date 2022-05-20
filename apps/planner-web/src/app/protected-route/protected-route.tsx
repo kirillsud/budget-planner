@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { LoginRouteState, selectAuthToken } from '@planner/auth-feature';
+import { LoginRouteState, selectAuthToken } from '@planner/auth-web';
 
 /* eslint-disable-next-line */
 export interface ProtectedRouteProps {

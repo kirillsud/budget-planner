@@ -4,8 +4,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 
-import { BUDGET_FEATURE_KEY, budgetReducer } from '@planner/budget-feature';
-import { AUTH_FEATURE_KEY, authReducer } from '@planner/auth-feature';
+import { BUDGET_FEATURE_KEY, budgetReducer } from '@planner/budget-web';
+import { AUTH_FEATURE_KEY, authReducer } from '@planner/auth-web';
 
 import App from './app/app';
 
