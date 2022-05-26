@@ -1,6 +1,4 @@
 import {
-  Action,
-  AnyAction,
   createAsyncThunk,
   createSelector,
   createSlice,
@@ -118,9 +116,8 @@ export const authSlice = createSlice({
 export const authReducer = authSlice.reducer;
 export const authActions = authSlice.actions;
 
-export const getAuthState = (rootState: {
-  [AUTH_FEATURE_KEY]: AuthState;
-}): AuthState => rootState[AUTH_FEATURE_KEY];
+export const getAuthState = (rootState: Record<string, unknown>): AuthState =>
+  rootState[AUTH_FEATURE_KEY] as AuthState;
 
 export const selectAuthToken = createSelector(getAuthState, (x) => x.token);
 export const selectAuthError = createSelector(getAuthState, (x) => x.error);

@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
-import { selectBudgetLoading } from './budget.slice';
+import { selectBudgetLoading } from './store/selectors';
 import BudgetCreate from './components/budget-create/budget-create';
 import BudgetEdit from './components/budget-edit/budget-edit';
 import BudgetList from './components/budget-list/budget-list';
@@ -12,6 +12,7 @@ export function BudgetFeature(props: BudgetFeatureProps) {
   const budgetLoading = useSelector(selectBudgetLoading) !== 'loaded';
 
   if (budgetLoading) {
+    // TODO: replace with loading component
     return <div>Выполняет загрузка данных...</div>;
   }
 

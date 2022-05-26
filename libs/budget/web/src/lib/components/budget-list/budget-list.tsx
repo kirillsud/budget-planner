@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { BudgetRecord } from '@planner/budget-domain';
-import { selectAllBudget } from '../../budget.slice';
+import { selectAllBudget } from '../../store';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 /* eslint-disable-next-line */

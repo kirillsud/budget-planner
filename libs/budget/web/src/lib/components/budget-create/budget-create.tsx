@@ -3,9 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BudgetRecord, TimestampInMsec } from '@planner/budget-domain';
 import { HttpValidationError, ValidationError } from '@planner/common-web';
-import { selectAuthToken } from '@planner/auth-web';
-import { budgetActions } from '../../budget.slice';
-import { createRecord } from '../../utils/api';
+import { budgetThunks, selectBudgetCreating, selectBudgetCreatingError } from '../../store';
 
 export interface BudgetCreateProps {
   type: BudgetRecord['type'];
@@ -15,21 +13,26 @@ export function BudgetCreate(props: BudgetCreateProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const authToken = useSelector(selectAuthToken);
 
   const { type } = props;
   const date = new Date().toISOString().substring(0, 10);
 
-  const [loadingStatus, setLoadingStatus] = useState<boolean>(false);
-  const [error, setError] = useState<HttpValidationError | undefined>();
+  const loadingStatus = useSelector(selectBudgetCreating);
+  const error = useSelector(selectBudgetCreatingError);
+
   const [form, setForm] = useState({
     title: '',
     amount: 0,
     date,
   });
 
-  const stringError = error?.message && Object.keys(error.validation).length === 0;
-  const validationError = error?.validation['body'] ?? undefined;
+  const stringError = typeof error === 'string'
+    ? error
+    : error instanceof Error && !(error instanceof HttpValidationError)
+      ? error.message
+      : undefined;
+
+  const validationError = error instanceof HttpValidationError ? error.validation['body'] : undefined;
 
   return (
     <div>
@@ -37,7 +40,7 @@ export function BudgetCreate(props: BudgetCreateProps) {
 
       <form onSubmit={submit}>
         {stringError && <div>{stringError}</div>}
-        <fieldset disabled={loadingStatus}>
+        <fieldset disabled={loadingStatus === 'loading'}>
           <p>
             <label>Описание</label>
             <input
@@ -90,44 +93,22 @@ export function BudgetCreate(props: BudgetCreateProps) {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!authToken) {
-      return;
-    }
-
     const date = new Date(form.date).valueOf() as TimestampInMsec;
 
-    setLoadingStatus(true);
-
-    try {
-      const data = await createRecord(
-        {
-          ...form,
-          type,
-          date: {
-            from: date,
-            to: date,
-          },
+    const result = await dispatch(
+      budgetThunks.createOne({
+        ...form,
+        type,
+        date: {
+          from: date,
+          to: date,
         },
-        authToken
-      );
+    }));
 
-      setError(undefined);
-
-      dispatch(
-        budgetActions.add({
-          id: data.id,
-          record: data,
-          loadingStatus: 'loaded',
-        })
-      );
-
+    if (!result.error) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const state = location.state as any;
       navigate(state?.['from'] || '../../');
-    } catch (error: unknown | HttpValidationError) {
-      setError(error as HttpValidationError);
-    } finally {
-      setLoadingStatus(false);
     }
   }
 }

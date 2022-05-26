@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Login, selectAuthToken, authLogout } from '@planner/auth-web';
-import { BudgetFeature, fetchBudget } from '@planner/budget-web';
+import { BudgetFeature, budgetThunks } from '@planner/budget-web';
 import ProtectedRoute from './protected-route/protected-route';
 
 const App = () => {
@@ -10,8 +10,7 @@ const App = () => {
   const authToken = useSelector(selectAuthToken);
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dispatch(fetchBudget() as any);
+    dispatch(budgetThunks.fetchAll());
   }, [dispatch, authToken]);
 
   async function logout() {

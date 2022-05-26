@@ -134,6 +134,39 @@ export class LegacyApi {
     processUpdateError(data, record);
   }
 
+  async remove(auth: AuthToken, id: BudgetRecord['id'], type: BudgetRecord['type']): Promise<void> {
+    const requestData = { id };
+    let requestPath: string;
+
+    switch (type) {
+      case 'income':
+        requestPath = '/income_delete.php';
+        break;
+
+      case 'expense':
+        requestPath = '/goal_delete.php';
+        break;
+
+      default:
+        throw new Error(`Unknown budget record type '${type}'`);
+    }
+
+    const { data } = await this.request<number>(auth, requestPath, {
+      method: 'post',
+      data: requestData
+    }, true);
+
+    switch (data) {
+      case 0: return;
+      case -1:
+      case -2:
+        throw new Error('Invalid record id');
+    }
+
+    throw new Error(`Unknown error code ${data}`);
+
+    }
+
   private async request<T>(auth: AuthToken, path: string, config: AxiosRequestConfig, form = false): Promise<AxiosResponse<T>> {
     const url = `${this.url}${path}`;
     const cookies = `PHPSESSID=${auth.session}; auth_series=${auth.series}; auth_token=${auth.token}`;

@@ -43,6 +43,26 @@ router.post('/api/budget/:id',
   })
 );
 
+router.delete('/api/budget/:id',
+  celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+      id: Joi.number().min(1).required(),
+    }),
+    [Segments.BODY]: Joi.object().keys({
+      type: Joi.string().valid('income', 'expense').required(),
+    }),
+  }, {
+    abortEarly: false,
+  }),
+  catchAsync(async (req: AuthRequest, res) => {
+    const id = parseInt(req.params['id']);
+    const type: BudgetRecord['type'] = req.body.type;
+
+    await legacyApi.remove(req.auth, id, type);
+    res.status(204).send();
+  })
+);
+
 router.put('/api/budget',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
@@ -63,7 +83,7 @@ router.put('/api/budget',
     };
 
     const record = await legacyApi.updateOrCreate(req.auth, data);
-    res.send(record);
+    res.status(201).send(record);
   })
 );
 

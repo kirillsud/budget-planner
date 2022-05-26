@@ -1,10 +1,9 @@
 import { TimestampInMsec } from '@planner/budget-domain';
-import { ValidationError } from '@planner/common-web';
-import { PayloadAction } from '@reduxjs/toolkit';
-import { FormEvent, useState } from 'react';
+import { HttpValidationError, ValidationError } from '@planner/common-web';
+import { FormEvent, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { selectBudgetById, updateBudget } from '../../budget.slice';
+import { selectBudgetById, budgetThunks } from '../../store';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BudgetEditProps {}
@@ -14,29 +13,46 @@ export function BudgetEdit(props: BudgetEditProps) {
   const location = useLocation();
   const dispatch = useDispatch();
 
+  const [form, setForm] = useState({
+    title: '',
+    amount: 0,
+    date: '',
+  });
+
   const { recordId } = useParams();
   if (!recordId) {
     throw new Error('recordId is required');
   }
 
   const entity = useSelector(selectBudgetById(recordId));
+
+  useEffect(() => {
+    if (!entity) {
+      return;
+    }
+    
+    const { record } = entity;
+    const date = new Date(record.date.from).toISOString().substring(0, 10);
+
+    setForm({
+      title: record.title,
+      amount: record.amount,
+      date,
+    });
+  }, [entity]);
+
   if (!entity) {
-    throw new Error('Record not found');
+    // TODO: replace with loading component
+    return <div>Выполняет загрузка данных...</div>;
   }
 
   const { record, loadingStatus, error } = entity;
   const type = record.type;
-  const date = new Date(record.date.from).toISOString().substring(0, 10);
 
   const stringError = (typeof error === 'string' && error) || undefined;
   const validationError =
-    (typeof error === 'object' && error.validation['body']) || undefined;
-
-  const [form, setForm] = useState({
-    title: record.title,
-    amount: record.amount,
-    date,
-  });
+    (error instanceof HttpValidationError && error.validation['body']) ||
+    undefined;
 
   return (
     <div>
@@ -76,13 +92,16 @@ export function BudgetEdit(props: BudgetEditProps) {
           </p>
           <p>
             <button type="submit">Сохранить</button>
+            <button type="button" onClick={remove}>
+              Удалить
+            </button>
           </p>
         </fieldset>
       </form>
 
       <style jsx>{`
         label {
-          margin: .5em;
+          margin: 0.5em;
           width: 80px;
           display: inline-block;
         }
@@ -94,6 +113,12 @@ export function BudgetEdit(props: BudgetEditProps) {
     </div>
   );
 
+  function navigateBack() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const returnUrl = (location.state as any)?.from || '../../';
+    navigate(returnUrl);
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -103,8 +128,8 @@ export function BudgetEdit(props: BudgetEditProps) {
 
     const date = new Date(form.date).valueOf() as TimestampInMsec;
 
-    const result = await dispatch<PayloadAction<void, string, never, string>>(
-      updateBudget({
+    const result = await dispatch(
+      budgetThunks.updateOne({
         id: record.id,
         changes: {
           ...form,
@@ -113,12 +138,23 @@ export function BudgetEdit(props: BudgetEditProps) {
             to: date,
           },
         },
-      }) as any
+      })
     );
 
     if (!result.error) {
-      const state = location.state as any;
-      navigate(state?.['from'] || '../../');
+      navigateBack();
+    }
+  }
+
+  async function remove() {
+    if (!record) {
+      return;
+    }
+
+    const result = await dispatch(budgetThunks.removeOne(record.id));
+
+    if (!result.error) {
+      navigateBack();
     }
   }
 }

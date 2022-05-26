@@ -1,4 +1,4 @@
-import { fetchBudget, budgetAdapter, budgetReducer } from './budget.slice';
+import { fetchBudget, budgetAdapter, budgetReducer } from './slice';
 
 describe('budget reducer', () => {
   it('should handle initial state', () => {
