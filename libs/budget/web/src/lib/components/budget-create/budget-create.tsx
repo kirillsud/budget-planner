@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BudgetRecord, TimestampInMsec } from '@planner/budget-domain';
 import { HttpValidationError, ValidationError } from '@planner/common-web';
-import { budgetThunks, selectBudgetCreating, selectBudgetCreatingError } from '../../store';
+import { budgetThunks, selectBudgetCreating } from '../../store';
 
 export interface BudgetCreateProps {
   type: BudgetRecord['type'];
@@ -17,8 +17,7 @@ export function BudgetCreate(props: BudgetCreateProps) {
   const { type } = props;
   const date = new Date().toISOString().substring(0, 10);
 
-  const loadingStatus = useSelector(selectBudgetCreating);
-  const error = useSelector(selectBudgetCreatingError);
+  const loading = useSelector(selectBudgetCreating);
 
   const [form, setForm] = useState({
     title: '',
@@ -26,13 +25,12 @@ export function BudgetCreate(props: BudgetCreateProps) {
     date,
   });
 
-  const stringError = typeof error === 'string'
-    ? error
-    : error instanceof Error && !(error instanceof HttpValidationError)
-      ? error.message
-      : undefined;
-
-  const validationError = error instanceof HttpValidationError ? error.validation['body'] : undefined;
+  const error = loading instanceof Error ? loading : undefined;
+  const stringError = !(error instanceof HttpValidationError)
+    ? error?.message
+    : undefined;
+  const validationError =
+    error instanceof HttpValidationError ? error.validation['body'] : undefined;
 
   return (
     <div>
@@ -40,7 +38,7 @@ export function BudgetCreate(props: BudgetCreateProps) {
 
       <form onSubmit={submit}>
         {stringError && <div>{stringError}</div>}
-        <fieldset disabled={loadingStatus === 'loading'}>
+        <fieldset disabled={loading === 'loading'}>
           <p>
             <label>Описание</label>
             <input
@@ -103,7 +101,8 @@ export function BudgetCreate(props: BudgetCreateProps) {
           from: date,
           to: date,
         },
-    }));
+      })
+    );
 
     if (!result.error) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,8 +1,7 @@
 import { createAsyncThunkWithReducers, fromUnknownError } from '@planner/common-web';
 import { removeRecord } from '../../utils/api';
-import { BudgetState, budgetAdapter } from '../adapter';
-import { BudgetId } from '../constants';
-import { getAuthTokenFromThunk, getEntityFromThunk } from '../utils';
+import { BudgetId, BudgetState } from '../constants';
+import { getAuthTokenFromThunk, getEntityFromThunk } from './utils';
 
 export const removeOne = createAsyncThunkWithReducers<BudgetState, BudgetId, BudgetId>(
   'budget/removeOne',
@@ -12,30 +11,24 @@ export const removeOne = createAsyncThunkWithReducers<BudgetState, BudgetId, Bud
     await removeRecord(id, type, authToken);
     return id;
   },
-  (thunk, builder) => {
+  (thunk, builder, adapter) => {
     builder
       .addCase(thunk.pending, (state, action) => {
-        const id = action.meta.arg;
-
-        budgetAdapter.updateOne(state, {
-          id,
+        adapter.updateOne(state, {
+          id: action.meta.arg,
           changes: {
-            loadingStatus: 'loading',
-            error: undefined,
+            loading: 'loading',
           },
         });
       })
       .addCase(thunk.fulfilled, (state, action) => {
-        budgetAdapter.removeOne(state, action.payload);
+        adapter.removeOne(state, action.payload);
       })
       .addCase(thunk.rejected, (state, action) => {
-        const id = action.meta.arg;
-
-        budgetAdapter.updateOne(state, {
-          id,
+        adapter.updateOne(state, {
+          id: action.meta.arg,
           changes: {
-            loadingStatus: 'error',
-            error: fromUnknownError(action.payload),
+            loading: fromUnknownError(action.payload),
           },
         });
       });

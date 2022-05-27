@@ -4,16 +4,16 @@ import { selectBudgetLoading } from './store/selectors';
 import BudgetCreate from './components/budget-create/budget-create';
 import BudgetEdit from './components/budget-edit/budget-edit';
 import BudgetList from './components/budget-list/budget-list';
+import { Preloader } from '@planner/common-web';
 
 /* eslint-disable-next-line */
 export interface BudgetFeatureProps {}
 
 export function BudgetFeature(props: BudgetFeatureProps) {
-  const budgetLoading = useSelector(selectBudgetLoading) !== 'loaded';
+  const loading = useSelector(selectBudgetLoading) !== 'loaded';
 
-  if (budgetLoading) {
-    // TODO: replace with loading component
-    return <div>Выполняет загрузка данных...</div>;
+  if (loading) {
+    return <Preloader />;
   }
 
   return (

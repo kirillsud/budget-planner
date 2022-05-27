@@ -1,5 +1,9 @@
 import { TimestampInMsec } from '@planner/budget-domain';
-import { HttpValidationError, ValidationError } from '@planner/common-web';
+import {
+  HttpValidationError,
+  Preloader,
+  ValidationError,
+} from '@planner/common-web';
 import { FormEvent, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -30,7 +34,7 @@ export function BudgetEdit(props: BudgetEditProps) {
     if (!entity) {
       return;
     }
-    
+
     const { record } = entity;
     const date = new Date(record.date.from).toISOString().substring(0, 10);
 
@@ -39,17 +43,20 @@ export function BudgetEdit(props: BudgetEditProps) {
       amount: record.amount,
       date,
     });
-  }, [entity]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!entity) {
-    // TODO: replace with loading component
-    return <div>Выполняет загрузка данных...</div>;
+    return <Preloader />;
   }
 
-  const { record, loadingStatus, error } = entity;
+  const { record, loading } = entity;
   const type = record.type;
 
-  const stringError = (typeof error === 'string' && error) || undefined;
+  const error = loading instanceof Error ? loading : undefined;
+  const stringError = !(error instanceof HttpValidationError)
+    ? error?.message
+    : undefined;
   const validationError =
     (error instanceof HttpValidationError && error.validation['body']) ||
     undefined;
@@ -60,7 +67,7 @@ export function BudgetEdit(props: BudgetEditProps) {
 
       <form onSubmit={submit}>
         {stringError && <div>{stringError}</div>}
-        <fieldset disabled={loadingStatus === 'loading'}>
+        <fieldset disabled={loading === 'loading'}>
           <p>
             <label>Описание</label>
             <input

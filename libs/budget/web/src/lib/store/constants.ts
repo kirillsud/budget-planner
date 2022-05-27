@@ -1,12 +1,18 @@
 import { BudgetRecord } from '@planner/budget-domain';
+import { LoadingState } from '@planner/common-web';
+import { EntityState } from '@reduxjs/toolkit';
+
+export const BUDGET_FEATURE_KEY = 'budget';
 
 export type BudgetId = BudgetRecord['id'];
 
 export interface BudgetEntity {
   id: BudgetId;
   record: BudgetRecord;
-  loadingStatus: 'loading' | 'loaded' | 'error';
-  error?: string | Error;
+  loading: LoadingState;
 }
 
-export const BUDGET_FEATURE_KEY = 'budget';
+export interface BudgetState extends EntityState<BudgetEntity> {
+  loading: LoadingState<'not loaded'>;
+  creating: LoadingState<'not created', Error, 'success'>;
+}

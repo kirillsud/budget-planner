@@ -1,14 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { BUDGET_FEATURE_KEY } from './constants';
-import { budgetAdapter, BudgetState } from './adapter';
+import { BudgetState, BUDGET_FEATURE_KEY } from './constants';
+import { budgetAdapter } from './adapter';
 import { fetchAll } from './thunks/fetch';
 import { removeOne } from './thunks/remove';
 import { updateOne } from './thunks/update';
 import { createOne } from './thunks/create';
 
+
 const initialBudgetState: BudgetState = budgetAdapter.getInitialState({
-  loadingStatus: 'not loaded',
-  createStatus: 'not created',
+  loading: 'not loaded',
+  creating: 'not created',
 });
 
 const budgetSlice = createSlice({
@@ -18,10 +19,10 @@ const budgetSlice = createSlice({
     removeAll: budgetAdapter.removeAll,
   },
   extraReducers: (builder) => {
-    fetchAll.reducers(builder);
-    createOne.reducers(builder);
-    updateOne.reducers(builder);
-    removeOne.reducers(builder);
+    fetchAll.reducers(builder, budgetAdapter);
+    createOne.reducers(builder, budgetAdapter);
+    updateOne.reducers(builder, budgetAdapter);
+    removeOne.reducers(builder, budgetAdapter);
   },
 });
 

@@ -2,9 +2,8 @@ import { BudgetRecord } from '@planner/budget-domain';
 import { createAsyncThunkWithReducers, fromUnknownError } from '@planner/common-web';
 import { Update } from '@reduxjs/toolkit';
 import { updateRecord } from '../../utils/api';
-import { BudgetState, budgetAdapter } from '../adapter';
-import { BudgetId } from '../constants';
-import { getAuthTokenFromThunk, getEntityFromThunk } from '../utils';
+import { BudgetId, BudgetState } from '../constants';
+import { getAuthTokenFromThunk, getEntityFromThunk } from './utils';
 
 export const updateOne = createAsyncThunkWithReducers<BudgetState, BudgetRecord, Update<BudgetRecord>>(
   'budget/updateOne',
@@ -15,40 +14,32 @@ export const updateOne = createAsyncThunkWithReducers<BudgetState, BudgetRecord,
     const data = await updateRecord({ ...record, ...update.changes }, authToken);
     return data as BudgetRecord;
   },
-  (thunk, builder) => {
+  (thunk, builder, adapter) => {
     builder
       .addCase(thunk.pending, (state, action) => {
-        const { id } = action.meta.arg;
-
-        budgetAdapter.updateOne(state, {
-          id,
+        adapter.updateOne(state, {
+          id: action.meta.arg.id,
           changes: {
-            loadingStatus: 'loading',
-            error: undefined,
+            loading: 'loading'
           },
         });
       })
       .addCase(thunk.fulfilled, (state, action) => {
         const record = action.payload;
 
-        budgetAdapter.updateOne(state, {
+        adapter.updateOne(state, {
           id: record.id,
           changes: {
             record,
-            loadingStatus: 'loaded',
-            error: undefined,
+            loading: 'loaded',
           },
         });
       })
       .addCase(thunk.rejected, (state, action) => {
-        const { id } = action.meta.arg;
-        const error = action.payload;
-
-        budgetAdapter.updateOne(state, {
-          id,
+        adapter.updateOne(state, {
+          id: action.meta.arg.id,
           changes: {
-            loadingStatus: 'error',
-            error: fromUnknownError(error),
+            loading: fromUnknownError(action.payload),
           },
         });
       });
