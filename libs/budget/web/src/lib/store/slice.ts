@@ -6,7 +6,6 @@ import { removeOne } from './thunks/remove';
 import { updateOne } from './thunks/update';
 import { createOne } from './thunks/create';
 
-
 const initialBudgetState: BudgetState = budgetAdapter.getInitialState({
   loading: 'not loaded',
   creating: 'not created',
@@ -35,4 +34,4 @@ export const budgetThunks = {
   createOne,
   updateOne,
   removeOne,
-}
+};

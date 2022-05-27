@@ -1,17 +1,27 @@
 import { BudgetRecord } from '@planner/budget-domain';
-import { createAsyncThunkWithReducers, fromUnknownError } from '@planner/common-web';
+import {
+  createAsyncThunkWithReducers,
+  fromUnknownError,
+} from '@planner/common-web';
 import { Update } from '@reduxjs/toolkit';
 import { updateRecord } from '../../utils/api';
 import { BudgetId, BudgetState } from '../constants';
 import { getAuthTokenFromThunk, getEntityFromThunk } from './utils';
 
-export const updateOne = createAsyncThunkWithReducers<BudgetState, BudgetRecord, Update<BudgetRecord>>(
+export const updateOne = createAsyncThunkWithReducers<
+  BudgetState,
+  BudgetRecord,
+  Update<BudgetRecord>
+>(
   'budget/updateOne',
   async (update, thunkAPI) => {
     const authToken = getAuthTokenFromThunk(thunkAPI);
     const { record } = getEntityFromThunk(update.id as BudgetId, thunkAPI);
 
-    const data = await updateRecord({ ...record, ...update.changes }, authToken);
+    const data = await updateRecord(
+      { ...record, ...update.changes },
+      authToken
+    );
     return data as BudgetRecord;
   },
   (thunk, builder, adapter) => {
@@ -20,7 +30,7 @@ export const updateOne = createAsyncThunkWithReducers<BudgetState, BudgetRecord,
         adapter.updateOne(state, {
           id: action.meta.arg.id,
           changes: {
-            loading: 'loading'
+            loading: 'loading',
           },
         });
       })
@@ -43,5 +53,5 @@ export const updateOne = createAsyncThunkWithReducers<BudgetState, BudgetRecord,
           },
         });
       });
-  },
+  }
 );

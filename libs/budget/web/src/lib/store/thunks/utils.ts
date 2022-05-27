@@ -1,4 +1,8 @@
-import { AuthToken, selectAuthToken, AuthorizationError } from '@planner/auth-web';
+import {
+  AuthToken,
+  selectAuthToken,
+  AuthorizationError,
+} from '@planner/auth-web';
 import { ThunkAPI } from '@planner/common-web';
 import { BudgetEntity } from '../constants';
 import { selectBudgetById } from '../selectors';
@@ -18,7 +22,10 @@ export function getAuthTokenFromThunk(thunkAPI: ThunkAPI): AuthToken {
   return authToken;
 }
 
-export function getEntityFromThunk(id: BudgetEntity['id'], thunkAPI: ThunkAPI): BudgetEntity {
+export function getEntityFromThunk(
+  id: BudgetEntity['id'],
+  thunkAPI: ThunkAPI
+): BudgetEntity {
   const state = getStateFromThunk(thunkAPI);
   const entity = selectBudgetById(id)(state);
 

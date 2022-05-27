@@ -10,8 +10,8 @@ export interface AuthToken {
 }
 
 export interface AuthRequest extends Request {
-  auth: AuthToken
-};
+  auth: AuthToken;
+}
 
 export function auth(req: AuthRequest, _res, next) {
   const token = req.headers.authorization;

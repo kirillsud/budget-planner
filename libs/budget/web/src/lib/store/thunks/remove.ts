@@ -1,9 +1,16 @@
-import { createAsyncThunkWithReducers, fromUnknownError } from '@planner/common-web';
+import {
+  createAsyncThunkWithReducers,
+  fromUnknownError,
+} from '@planner/common-web';
 import { removeRecord } from '../../utils/api';
 import { BudgetId, BudgetState } from '../constants';
 import { getAuthTokenFromThunk, getEntityFromThunk } from './utils';
 
-export const removeOne = createAsyncThunkWithReducers<BudgetState, BudgetId, BudgetId>(
+export const removeOne = createAsyncThunkWithReducers<
+  BudgetState,
+  BudgetId,
+  BudgetId
+>(
   'budget/removeOne',
   async (id, thunkAPI) => {
     const authToken = getAuthTokenFromThunk(thunkAPI);
@@ -32,5 +39,5 @@ export const removeOne = createAsyncThunkWithReducers<BudgetState, BudgetId, Bud
           },
         });
       });
-  },
+  }
 );

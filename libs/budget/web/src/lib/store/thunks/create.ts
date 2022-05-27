@@ -1,10 +1,17 @@
 import { BudgetRecord } from '@planner/budget-domain';
-import { createAsyncThunkWithReducers, fromUnknownError } from '@planner/common-web';
+import {
+  createAsyncThunkWithReducers,
+  fromUnknownError,
+} from '@planner/common-web';
 import { createRecord } from '../../utils/api';
 import { BudgetState } from '../constants';
 import { getAuthTokenFromThunk } from './utils';
 
-export const createOne = createAsyncThunkWithReducers<BudgetState, BudgetRecord, Omit<BudgetRecord, 'id' | 'completed'>>(
+export const createOne = createAsyncThunkWithReducers<
+  BudgetState,
+  BudgetRecord,
+  Omit<BudgetRecord, 'id' | 'completed'>
+>(
   'budget/createOne',
   async (record, thunkAPI) => {
     const authToken = getAuthTokenFromThunk(thunkAPI);
@@ -31,5 +38,5 @@ export const createOne = createAsyncThunkWithReducers<BudgetState, BudgetRecord,
       .addCase(thunk.rejected, (state, action) => {
         state.creating = fromUnknownError(action.payload);
       });
-  },
+  }
 );

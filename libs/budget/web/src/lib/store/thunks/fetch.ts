@@ -1,10 +1,16 @@
 import { BudgetRecord } from '@planner/budget-domain';
-import { createAsyncThunkWithReducers, fromUnknownError } from '@planner/common-web';
+import {
+  createAsyncThunkWithReducers,
+  fromUnknownError,
+} from '@planner/common-web';
 import { fetchRecords } from '../../utils/api';
 import { BudgetState } from '../constants';
 import { getAuthTokenFromThunk } from './utils';
 
-export const fetchAll = createAsyncThunkWithReducers<BudgetState, BudgetRecord[]>(
+export const fetchAll = createAsyncThunkWithReducers<
+  BudgetState,
+  BudgetRecord[]
+>(
   'budget/fetchAll',
   async (_, thunkAPI) => {
     const authToken = getAuthTokenFromThunk(thunkAPI);

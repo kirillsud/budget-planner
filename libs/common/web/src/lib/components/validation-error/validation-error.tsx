@@ -4,7 +4,7 @@ export interface ValidationErrorProps {
   error?: ErrorBase;
 }
 
-export function ValidationError({error}: ValidationErrorProps) {
+export function ValidationError({ error }: ValidationErrorProps) {
   if (!error) {
     return null;
   }
@@ -16,7 +16,7 @@ export function ValidationError({error}: ValidationErrorProps) {
       <style jsx>{`
         .root {
           color: pink;
-          margin: .5em;
+          margin: 0.5em;
         }
       `}</style>
     </span>

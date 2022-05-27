@@ -7,7 +7,8 @@ import { generateJwt } from '../utils/jwt';
 
 const router = Router();
 
-router.post('/api/auth/login',
+router.post(
+  '/api/auth/login',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       email: Joi.string().required().email(),
@@ -16,16 +17,24 @@ router.post('/api/auth/login',
     }),
   }),
   catchAsync(async (req, res) => {
-    const token = await legacyApi.login(req.body.email, req.body.password, req.body.remember);
+    const token = await legacyApi.login(
+      req.body.email,
+      req.body.password,
+      req.body.remember
+    );
     const jwt = generateJwt(token);
 
     res.send({ jwt });
   })
 );
 
-router.get('/api/auth/logout', auth, catchAsync(async (req: AuthRequest, res) => {
-  await legacyApi.logout(req.auth);
-  res.send();
-}));
+router.get(
+  '/api/auth/logout',
+  auth,
+  catchAsync(async (req: AuthRequest, res) => {
+    await legacyApi.logout(req.auth);
+    res.send();
+  })
+);
 
 export default router;

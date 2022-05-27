@@ -5,9 +5,7 @@ export function Preloader(props: PreloaderProps) {
   return (
     <div>
       Выполняет загрузка данных...
-      
-      <style jsx>{`
-      `}</style>
+      <style jsx>{``}</style>
     </div>
   );
 }

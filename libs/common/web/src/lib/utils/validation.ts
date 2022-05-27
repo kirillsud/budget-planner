@@ -1,4 +1,10 @@
-export type SourceType = 'params' | 'headers' | 'query' | 'cookies' | 'signedCookies' | 'body';
+export type SourceType =
+  | 'params'
+  | 'headers'
+  | 'query'
+  | 'cookies'
+  | 'signedCookies'
+  | 'body';
 
 // TODO: move to common library for api and web apps
 export class HttpValidationError extends Error {
@@ -11,7 +17,7 @@ export interface ValidationErrors {
   [type: string]: {
     [path: string]: ErrorBase;
   };
-};
+}
 
 export interface ErrorBase {
   message: string;
