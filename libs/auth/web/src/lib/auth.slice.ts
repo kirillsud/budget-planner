@@ -1,10 +1,9 @@
 import {
-  createAsyncThunk,
   createSelector,
   createSlice,
   PayloadAction,
 } from '@reduxjs/toolkit';
-import { config } from '@planner/common-web';
+import { config, createAsyncThunkWithReducers, fromUnknownError, LoadingState } from '@planner/common-web';
 
 const authTokenStorageKey = 'authToken';
 
@@ -16,8 +15,7 @@ export type AuthToken = string;
 
 export interface AuthState {
   token: AuthToken | null;
-  loadingStatus: 'not loaded' | 'loading' | 'loaded' | 'error';
-  error?: string;
+  loading: LoadingState<'not loaded'>;
 }
 
 export interface LoginParams {
@@ -26,7 +24,7 @@ export interface LoginParams {
   remember: boolean;
 }
 
-export const authLogin = createAsyncThunk(
+export const authLogin = createAsyncThunkWithReducers<AuthState, AuthToken, LoginParams>(
   'auth/login',
   async (authData: LoginParams, thunkAPI) => {
     const response = await fetch(`${apiUrl}/auth/login`, {
@@ -45,10 +43,29 @@ export const authLogin = createAsyncThunk(
     }
 
     return data.jwt;
+  },
+  (thunk, builder) => {
+    builder
+      .addCase(thunk.pending, (state: AuthState) => {
+        state.loading = 'loading';
+      })
+      .addCase(
+        thunk.fulfilled,
+        (state: AuthState, action: PayloadAction<AuthToken>) => {
+          const token = action.payload;
+          state.token = token;
+          state.loading = 'loaded';
+
+          localStorage.setItem(authTokenStorageKey, token);
+        }
+      )
+      .addCase(thunk.rejected, (state: AuthState, action) => {
+        state.loading = fromUnknownError(action.payload);
+      });
   }
 );
 
-export const authLogout = createAsyncThunk(
+export const authLogout = createAsyncThunkWithReducers<AuthState, void>(
   'auth/logout',
   async (_, thunkAPI) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,12 +79,27 @@ export const authLogout = createAsyncThunk(
         Authorization: authToken,
       },
     });
+  },
+  (thunk, builder) => {
+    builder
+      .addCase(thunk.pending, (state: AuthState) => {
+        state.loading = 'loading';
+      })
+      .addCase(thunk.fulfilled, (state: AuthState) => {
+        state.token = null;
+        state.loading = 'loaded';
+
+        localStorage.removeItem(authTokenStorageKey);
+      })
+      .addCase(thunk.rejected, (state: AuthState, action) => {
+        state.loading = fromUnknownError(action.error.message);
+      });
   }
 );
 
 export const initialAuthState: AuthState = {
   token: localStorage.getItem(authTokenStorageKey),
-  loadingStatus: 'not loaded',
+  loading: 'not loaded',
 };
 
 export const authSlice = createSlice({
@@ -75,53 +107,20 @@ export const authSlice = createSlice({
   initialState: initialAuthState,
   reducers: {},
   extraReducers: (builder) => {
-    builder
-      .addCase(authLogin.pending, (state: AuthState) => {
-        state.loadingStatus = 'loading';
-        state.error = undefined;
-      })
-      .addCase(
-        authLogin.fulfilled,
-        (state: AuthState, action: PayloadAction<AuthToken>) => {
-          const token = action.payload;
-          state.token = token;
-          state.loadingStatus = 'loaded';
-
-          localStorage.setItem(authTokenStorageKey, token);
-        }
-      )
-      .addCase(authLogin.rejected, (state: AuthState, action) => {
-        state.loadingStatus = 'error';
-        state.error = action.payload as string;
-      });
-
-    builder
-      .addCase(authLogout.pending, (state: AuthState) => {
-        state.loadingStatus = 'loading';
-        state.error = undefined;
-      })
-      .addCase(authLogout.fulfilled, (state: AuthState) => {
-        state.token = null;
-        state.loadingStatus = 'loaded';
-
-        localStorage.removeItem(authTokenStorageKey);
-      })
-      .addCase(authLogout.rejected, (state: AuthState, action) => {
-        state.loadingStatus = 'error';
-        state.error = action.error.message;
-      });
+    authLogin.reducers(builder, void 0);
+    authLogout.reducers(builder, void 0);
   },
 });
 
 export const authReducer = authSlice.reducer;
+
 export const authActions = authSlice.actions;
 
 export const getAuthState = (rootState: Record<string, unknown>): AuthState =>
   rootState[AUTH_FEATURE_KEY] as AuthState;
 
-export const selectAuthToken = createSelector(getAuthState, (x) => x.token);
-export const selectAuthError = createSelector(getAuthState, (x) => x.error);
-export const selectAuthLoadingStatus = createSelector(
-  getAuthState,
-  (x) => x.loadingStatus
-);
+export const selectAuthToken =
+  createSelector(getAuthState, (x) => x.token);
+
+export const selectAuthLoadingStatus =
+  createSelector(getAuthState, (x) => x.loading);

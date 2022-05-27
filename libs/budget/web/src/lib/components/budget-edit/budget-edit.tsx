@@ -1,12 +1,13 @@
+import { FormEvent, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { TimestampInMsec } from '@planner/budget-domain';
 import {
   HttpValidationError,
   Preloader,
   ValidationError,
 } from '@planner/common-web';
-import { FormEvent, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { selectBudgetById, budgetThunks } from '../../store';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -16,6 +17,7 @@ export function BudgetEdit(props: BudgetEditProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  const { t } = useTranslation();
 
   const [form, setForm] = useState({
     title: '',
@@ -63,13 +65,13 @@ export function BudgetEdit(props: BudgetEditProps) {
 
   return (
     <div>
-      <h2>Редактирование {type === 'income' ? 'дохода' : 'расхода'}</h2>
+      <h2>{type === 'income' ? t('Edit income') : t('Edit expense')}</h2>
 
       <form onSubmit={submit}>
         {stringError && <div>{stringError}</div>}
         <fieldset disabled={loading === 'loading'}>
           <p>
-            <label>Описание</label>
+            <label>{t('Budget form.Title')}</label>
             <input
               type="text"
               value={form.title}
@@ -78,7 +80,7 @@ export function BudgetEdit(props: BudgetEditProps) {
             <ValidationError error={validationError?.['title']} />
           </p>
           <p>
-            <label>Сумма</label>
+            <label>{t('Budget form.Amount')}</label>
             <input
               type="number"
               value={form.amount}
@@ -89,7 +91,7 @@ export function BudgetEdit(props: BudgetEditProps) {
             <ValidationError error={validationError?.['amount']} />
           </p>
           <p>
-            <label>Дата</label>
+            <label>{t('Budget form.Date')}</label>
             <input
               type="date"
               value={form.date}
@@ -98,9 +100,9 @@ export function BudgetEdit(props: BudgetEditProps) {
             <ValidationError error={validationError?.['date']} />
           </p>
           <p>
-            <button type="submit">Сохранить</button>
+            <button type="submit">{t('Budget form.Save')}</button>
             <button type="button" onClick={remove}>
-              Удалить
+              {t('Budget form.Delete')}
             </button>
           </p>
         </fieldset>

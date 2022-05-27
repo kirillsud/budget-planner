@@ -16,7 +16,7 @@ export type LoadingState<
 > = Progress | Success | Failed | Additional;
 
 export function createAsyncThunkWithReducers<
-  State extends EntityState<unknown>,
+  State,
   Returned,
   ThunkArg = void
 >(
@@ -25,7 +25,7 @@ export function createAsyncThunkWithReducers<
   reducers: (
     thunk: AsyncThunk<Returned, ThunkArg, EmptyObject>,
     builder: ActionReducerMapBuilder<State>,
-    adapter: EntityAdapter<StateEntity<State>>
+    adapter: State extends EntityState<unknown> ? EntityAdapter<StateEntity<State>> : undefined
   ) => void
 ) {
   const wrapper: AsyncThunkPayloadCreator<Returned, ThunkArg> = async (
@@ -65,7 +65,7 @@ type StateEntity<State extends EntityState<unknown>> = RecordElement<
 
 export type AsyncThunkWithReducers<
   Returned,
-  State extends EntityState<unknown>,
+  State,
   ThunkArg = void
 > =
   // Overrite AsyncThunk callable becasue @reduxjs/toolkit doesn't export field `type`
@@ -77,7 +77,7 @@ export type AsyncThunkWithReducers<
     AsyncThunk<Returned, ThunkArg, EmptyObject> & {
       reducers(
         builder: ActionReducerMapBuilder<State>,
-        adapter: EntityAdapter<StateEntity<State>>
+        adapter: State extends EntityState<unknown> ? EntityAdapter<StateEntity<State>> : undefined
       ): void;
     };
 

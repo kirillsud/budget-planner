@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { BudgetRecord, TimestampInMsec } from '@planner/budget-domain';
 import { HttpValidationError, ValidationError } from '@planner/common-web';
 import { budgetThunks, selectBudgetCreating } from '../../store';
@@ -13,6 +14,7 @@ export function BudgetCreate(props: BudgetCreateProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  const { t } = useTranslation();
 
   const { type } = props;
   const date = new Date().toISOString().substring(0, 10);
@@ -34,13 +36,13 @@ export function BudgetCreate(props: BudgetCreateProps) {
 
   return (
     <div>
-      <h2>Добавление {type === 'income' ? 'дохода' : 'расхода'}</h2>
+      <h2>{type === 'income' ? t('Create income') : t('Create expense')}</h2>
 
       <form onSubmit={submit}>
         {stringError && <div>{stringError}</div>}
         <fieldset disabled={loading === 'loading'}>
           <p>
-            <label>Описание</label>
+            <label>{t('Budget form.Title')}</label>
             <input
               type="text"
               value={form.title}
@@ -49,7 +51,7 @@ export function BudgetCreate(props: BudgetCreateProps) {
             <ValidationError error={validationError?.['title']} />
           </p>
           <p>
-            <label>Сумма</label>
+            <label>{t('Budget form.Amount')}</label>
             <input
               type="number"
               value={form.amount}
@@ -60,7 +62,7 @@ export function BudgetCreate(props: BudgetCreateProps) {
             <ValidationError error={validationError?.['amount']} />
           </p>
           <p>
-            <label>Дата</label>
+            <label>{t('Budget form.Date')}</label>
             <input
               type="date"
               value={form.date}
@@ -69,7 +71,7 @@ export function BudgetCreate(props: BudgetCreateProps) {
             <ValidationError error={validationError?.['date']} />
           </p>
           <p>
-            <button type="submit">Создать</button>
+            <button type="submit">{t('Budget form.Create')}</button>
           </p>
         </fieldset>
       </form>
