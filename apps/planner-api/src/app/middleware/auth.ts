@@ -6,7 +6,7 @@ export interface AuthToken {
   series: string;
   token: string;
   session: string;
-  expire: Date;
+  expire: number;
 }
 
 export interface AuthRequest extends Request {

@@ -3,10 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  authLogin,
+  authThunks,
   selectAuthLoadingStatus,
   selectAuthToken,
-} from '../../auth.slice';
+} from '../../store';
 
 export interface LoginRouteState {
   from: string;
@@ -34,7 +34,7 @@ export function Login(props: LoginProps) {
   }
 
   async function login() {
-    dispatch(authLogin({ email, password, remember: false }));
+    dispatch(authThunks.login({ email, password, remember: false }));
   }
 
   return (

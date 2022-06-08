@@ -37,4 +37,15 @@ router.get(
   })
 );
 
+router.get(
+  '/api/auth/refresh',
+  auth,
+  catchAsync(async (req: AuthRequest, res) => {
+    const token = await legacyApi.refresh(req.auth);
+    const jwt = generateJwt(token);
+
+    res.send({ jwt });
+  })
+);
+
 export default router;
