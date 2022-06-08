@@ -1,7 +1,7 @@
 {
   "sourceRoot": "libs/common/web/src",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:common", "type:utils", "type:web"],
   "targets": {
     "lint": {
       "executor": "@nrwl/linter:eslint",

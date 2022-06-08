@@ -1,7 +1,7 @@
 {
   "sourceRoot": "libs/budget/web/src",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:budget", "type:feature", "type:web"],
   "targets": {
     "lint": {
       "executor": "@nrwl/linter:eslint",

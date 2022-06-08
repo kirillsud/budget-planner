@@ -13,8 +13,36 @@
             "allow": [],
             "depConstraints": [
               {
-                "sourceTag": "*",
+                "sourceTag": "scope:auth",
+                "onlyDependOnLibsWithTags": ["scope:auth", "scope:common"]
+              },
+              {
+                "sourceTag": "scope:budget",
+                "onlyDependOnLibsWithTags": ["scope:budget", "scope:auth", "scope:common"]
+              },
+              {
+                "sourceTag": "type:app",
                 "onlyDependOnLibsWithTags": ["*"]
+              },
+              {
+                "sourceTag": "type:feature",
+                "onlyDependOnLibsWithTags": ["type:domain", "type:utils"]
+              },
+              {
+                "sourceTag": "type:domain",
+                "onlyDependOnLibsWithTags": ["type:utils"]
+              },
+              {
+                "sourceTag": "type:utils",
+                "onlyDependOnLibsWithTags": []
+              },
+              {
+                "sourceTag": "type:web",
+                "onlyDependOnLibsWithTags": ["type:web"]
+              },
+              {
+                "sourceTag": "type:api",
+                "onlyDependOnLibsWithTags": ["type:api"]
               }
             ]
           }

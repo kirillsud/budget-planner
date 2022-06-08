@@ -1,4 +1,4 @@
-import { config, createAsyncThunkWithReducers, fromUnknownError } from '@planner/common-web';
+import { config, createAsyncThunkWithReducers } from '@planner/common-web';
 import { AuthState, AuthToken, authTokenStorageKey } from '../constants';
 
 const { apiUrl } = config();

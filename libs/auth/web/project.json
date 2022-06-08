@@ -1,7 +1,7 @@
 {
   "sourceRoot": "libs/auth/web/src",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:auth", "type:utils", "type:web"],
   "targets": {
     "lint": {
       "executor": "@nrwl/linter:eslint",

@@ -18,5 +18,5 @@
       }
     }
   },
-  "tags": ["domain:budget type:domain"]
+  "tags": ["scope:budget", "type:domain", "type:web", "type:api"]
 }
