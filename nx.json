@@ -30,7 +30,7 @@
       }
     ]
   },
-  "defaultProject": "planner-api",
+  "defaultProject": "api",
   "generators": {
     "@nrwl/react": {
       "application": {

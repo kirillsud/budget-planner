@@ -1,16 +1,16 @@
 {
-  "sourceRoot": "apps/planner-web-e2e/src",
+  "sourceRoot": "apps/web-e2e/src",
   "projectType": "application",
   "targets": {
     "e2e": {
       "executor": "@nrwl/cypress:cypress",
       "options": {
-        "cypressConfig": "apps/planner-web-e2e/cypress.json",
-        "devServerTarget": "planner-web:serve:development"
+        "cypressConfig": "apps/web-e2e/cypress.json",
+        "devServerTarget": "web:serve:development"
       },
       "configurations": {
         "production": {
-          "devServerTarget": "planner-web:serve:production"
+          "devServerTarget": "web:serve:production"
         }
       }
     },
@@ -18,10 +18,10 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/planner-web-e2e/**/*.{js,ts}"]
+        "lintFilePatterns": ["apps/web-e2e/**/*.{js,ts}"]
       }
     }
   },
   "tags": [],
-  "implicitDependencies": ["planner-web"]
+  "implicitDependencies": ["web"]
 }

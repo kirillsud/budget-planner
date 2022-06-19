@@ -1,5 +1,5 @@
 module.exports = {
-  displayName: 'planner-api',
+  displayName: 'api',
   preset: '../../jest.preset.ts',
   globals: {
     'ts-jest': {
@@ -11,5 +11,5 @@ module.exports = {
     '^.+\\.[tj]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/apps/planner-api',
+  coverageDirectory: '../../coverage/apps/api',
 };

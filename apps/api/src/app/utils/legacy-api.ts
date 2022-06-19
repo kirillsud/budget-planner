@@ -72,8 +72,8 @@ export class LegacyApi {
     const { data } = await this.request<AuthToken | number>(auth, '/auth.php', {
       method: 'post',
       headers: {
-        'Cookie': `auth_token=${auth.token}; auth_series=${auth.series}`,
-      }
+        Cookie: `auth_token=${auth.token}; auth_series=${auth.series}`,
+      },
     });
 
     return processLoginResponse(data);
@@ -370,19 +370,23 @@ function processUpdateError(
     default:
       throw new Error(`Unknown error code ${error}`);
   }
-
 }
 
 function processLoginResponse<T>(response: number | T): T {
   if (typeof response === 'number') {
     switch (response) {
-      case 0: throw new HttpAuthorizationError('Already logged in');
+      case 0:
+        throw new HttpAuthorizationError('Already logged in');
       case -1:
       case -2:
-      case -3: throw new HttpAuthorizationError('Invalid email or password');
-      case -5: throw new HttpAuthorizationError('User is not activated');
-      case -6: throw new HttpAuthorizationError('User is blocked');
-      default: throw new HttpAuthorizationError();
+      case -3:
+        throw new HttpAuthorizationError('Invalid email or password');
+      case -5:
+        throw new HttpAuthorizationError('User is not activated');
+      case -6:
+        throw new HttpAuthorizationError('User is blocked');
+      default:
+        throw new HttpAuthorizationError();
     }
   }
 

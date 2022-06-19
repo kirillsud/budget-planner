@@ -1,10 +1,10 @@
 module.exports = {
-  displayName: 'planner-web',
+  displayName: 'web',
   preset: '../../jest.preset.ts',
   transform: {
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nrwl/react/plugins/jest',
     '^.+\\.[tj]sx?$': 'babel-jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../coverage/apps/planner-web',
+  coverageDirectory: '../../coverage/apps/web',
 };
