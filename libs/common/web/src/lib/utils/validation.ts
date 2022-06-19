@@ -1,3 +1,5 @@
+import { Context } from 'joi';
+
 export type SourceType =
   | 'params'
   | 'headers'
@@ -21,5 +23,6 @@ export interface ValidationErrors {
 
 export interface ErrorBase {
   message: string;
-  value: unknown;
+  type: string;
+  context: Context;
 }

@@ -39,22 +39,42 @@ export function Login(props: LoginProps) {
 
   return (
     <>
-      <label>{t('Login form.Email')}:</label>
-      <input
-        type="text"
-        value={email}
-        onChange={(evt) => setEmail(evt.target.value)}
-      />{' '}
-      <label>{t('Login form.Password')}:</label>
-      <input
-        type="password"
-        value={password}
-        onChange={(evt) => setPassword(evt.target.value)}
-      />
-      <button onClick={login} disabled={loading === 'loading'}>
-        {t('Login form.Submit')}
-      </button>
-      {error && <div>{error.message}</div>}
+      <form>
+        <fieldset disabled={loading === 'loading'}>
+          <label>{t('Login form.Email')}:</label>
+          <input
+            type="text"
+            value={email}
+            onChange={(evt) => setEmail(evt.target.value)}
+          />{' '}
+          <label>{t('Login form.Password')}:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(evt) => setPassword(evt.target.value)}
+          />
+          <button onClick={login} disabled={loading === 'loading'}>
+            {t('Login form.Submit')}
+          </button>
+          {error && <div>{error.message}</div>}
+        </fieldset>
+      </form>
+      <style jsx>{`
+        fieldset {
+          border: 0;
+        }
+        label {
+          display: block;
+        }
+        input {
+          display: block;
+          margin-bottom: 0.5em;
+        }
+        button {
+          display: block;
+          margin-top: 0.5em;
+        }
+      `}</style>
     </>
   );
 }

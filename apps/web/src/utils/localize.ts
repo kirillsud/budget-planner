@@ -1,9 +1,11 @@
 import i18n from 'i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
 function localize() {
   i18n
     .use(initReactI18next) // passes i18n down to react-i18next
+    .use(LanguageDetector)
     .init({
       // the translations
       // (tip move them in a JSON file and import them,
@@ -13,7 +15,9 @@ function localize() {
           translation: {
             'Budget planner': 'Budget Planner',
             'Not found': '404 Not found :(',
-            Logout: 'Logout',
+            'Logout': 'Logout',
+            'Locale': 'Locale',
+            'Loading': 'Loading...',
             'Create income': 'Create Income',
             'Create expense': 'Create Expense',
             'Edit income': 'Edit Income',
@@ -32,13 +36,24 @@ function localize() {
               Password: 'Password',
               Submit: 'Login',
             },
+            'Errors': {
+              'Common': {
+                'string.empty': '{{label}} must not be empty',
+                'number.empty': '{{label}} must not be empty',
+                'number.min': '{{label}} must be greater than or equal to {{limit}}',
+                'date.empty': '{{label}} must not be empty',
+                'date.min': '{{label}} must be greater than or equal to {{limit}}',
+              }
+            },
           },
         },
         ru: {
           translation: {
             'Budget planner': 'Планирование бюджета',
             'Not found': '404 Страница не найдена :(',
-            Logout: 'Выйти',
+            'Logout': 'Выйти',
+            'Locale': 'Язык',
+            'Loading': 'Выполняет загрузка данных...',
             'Create income': 'Добавление дохода',
             'Create expense': 'Добавление расхода',
             'Edit income': 'Редактирование дохода',
@@ -57,11 +72,24 @@ function localize() {
               Password: 'Пароль',
               Submit: 'Войти',
             },
+            'Errors': {
+              'Messages': {
+                'Budget form.Title': {
+                  'string.empty': '{{label}} должно быть указано',
+                },
+              },
+              'Common': {
+                'number.empty': '{{label}} должна быть указана',
+                'number.min': '{{label}} должна быть не меньше {{limit}}',
+                'date.empty': '{{label}} должна быть указана',
+                'date.min': '{{label}} должна быть не меньше {{limit}}',
+              },
+            }
           },
         },
       },
       // lng: "en", // if you're using a language detector, do not define the lng option
-      fallbackLng: 'ru',
+      // fallbackLng: 'ru',
 
       interpolation: {
         escapeValue: false, // react already safes from xss => https://www.i18next.com/translation-function/interpolation#unescape

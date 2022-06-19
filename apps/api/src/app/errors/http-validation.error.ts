@@ -1,5 +1,6 @@
 import { CelebrateError } from 'celebrate';
 import { HttpError } from './http.error';
+import * as Joi from 'joi';
 
 type ValidationLocation =
   | 'params'
@@ -10,8 +11,9 @@ type ValidationLocation =
   | 'body';
 
 export type ErrorBase = {
+  type: string;
   message: string;
-  value: unknown;
+  context: Joi.Context;
 };
 
 export interface ValidationError extends ErrorBase {
@@ -31,7 +33,8 @@ export class HttpValidationError extends HttpError {
 
       locationErrors[error.param] = {
         message: error.message,
-        value: error.value,
+        type: error.type,
+        context: error.context,
       };
 
       this.errors[error.location] = locationErrors;
@@ -43,15 +46,24 @@ export function fromCelebrateError(error: CelebrateError): HttpValidationError {
   const errors: ValidationError[] = [];
 
   for (const [segment, joiError] of error.details) {
-    errors.push(
-      ...joiError.details.map((detail) => ({
-        location: segment as ValidationLocation,
-        param: detail.path.join('.'),
-        value: detail.context.value,
-        message: detail.message,
-      }))
-    );
+    errors.push(...joiErrorToValidationErrors(joiError, segment as ValidationLocation));
   }
 
   return new HttpValidationError(errors);
+}
+
+export function fromJoiError(joiError: Joi.ValidationError, location: ValidationLocation): HttpValidationError {
+  const errors: ValidationError[] = joiErrorToValidationErrors(joiError, location);
+  return new HttpValidationError(errors);
+}
+
+function joiErrorToValidationErrors(joiError: Joi.ValidationError, location: ValidationLocation): ValidationError[] {
+  return joiError.details
+    .map((detail) => ({
+      location,
+      param: detail.path.join('.'),
+      context: detail.context,
+      type: detail.type,
+      message: detail.message,
+    } as ValidationError));
 }

@@ -2,9 +2,10 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BudgetRecord, TimestampInMsec } from '@planner/budget-domain';
 import { HttpAuthorizationError } from '../errors/http-authorization.error';
 import { HttpNotFoundError } from '../errors/http-not-found.error copy';
-import { HttpValidationError } from '../errors/http-validation.error';
+import { fromJoiError } from '../errors/http-validation.error';
 import { AuthToken } from '../middleware/auth';
 import { API_URL } from './config';
+import * as Joi from 'joi';
 
 type TimestampInSec = number & { type: 'timestamp-in-sec' };
 
@@ -305,71 +306,35 @@ function processUpdateError(
 ): void {
   switch (error) {
     case -1:
-      throw new HttpValidationError([
-        {
-          location: 'body',
-          param: 'id',
-          value: record.id,
-          message: 'Field "id" is missing or invalid',
-        },
-      ]);
+      throw createValidationError('id', Joi.number().required());
 
     case -2:
-      throw new HttpValidationError([
-        {
-          location: 'body',
-          param: 'title',
-          value: record.title,
-          message: 'Field "title" is missing or invalid',
-        },
-      ]);
+      throw createValidationError('title', Joi.string().required());
 
     case -3:
-      throw new HttpValidationError([
-        {
-          location: 'body',
-          param: 'amount',
-          value: record.amount,
-          message: 'Field "amount" is missing or invalid',
-        },
-      ]);
+      throw createValidationError('amount', Joi.number().required().min(0));
 
     case -4:
-      throw new HttpValidationError([
-        {
-          location: 'body',
-          param: 'date.from',
-          value: record.date.from,
-          message: 'Field "date.from" is missing or invalid',
-        },
-      ]);
+      throw createValidationError('date.from', Joi.date().required());
 
     case -5:
-      throw new HttpValidationError([
-        {
-          location: 'body',
-          param: 'date.to',
-          value: record.date.to,
-          message: 'Field "date.to" is missing or invalid',
-        },
-      ]);
+      throw createValidationError('date.to', Joi.date().required());
 
     case -6:
       throw new HttpNotFoundError();
 
     case -7:
-      throw new HttpValidationError([
-        {
-          location: 'body',
-          param: 'date.to',
-          value: record.date.to,
-          message: 'Field "date.to" should be greater than "date.from"',
-        },
-      ]);
+      throw createValidationError('date.to', Joi.date().min(record.date.from));
 
     default:
       throw new Error(`Unknown error code ${error}`);
   }
+}
+
+function createValidationError(field: string, schema: Joi.Schema): Error {
+  return fromJoiError(Joi.object({
+    'id': schema
+  }).validate({}).error, 'body');
 }
 
 function processLoginResponse<T>(response: number | T): T {

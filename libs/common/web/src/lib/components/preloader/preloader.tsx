@@ -1,10 +1,14 @@
+import { useTranslation } from 'react-i18next';
+
 /* eslint-disable-next-line */
 export interface PreloaderProps {}
 
 export function Preloader(props: PreloaderProps) {
+  const { t } = useTranslation();
+
   return (
     <div>
-      Выполняет загрузка данных...
+      {t('Loading')}
       <style jsx>{``}</style>
     </div>
   );

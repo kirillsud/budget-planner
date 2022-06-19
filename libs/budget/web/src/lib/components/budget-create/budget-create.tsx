@@ -48,7 +48,10 @@ export function BudgetCreate(props: BudgetCreateProps) {
               value={form.title}
               onChange={(evt) => setForm({ ...form, title: evt.target.value })}
             />
-            <ValidationError error={validationError?.['title']} />
+            <ValidationError
+              error={validationError?.['title']}
+              param="Budget form.Title"
+            />
           </p>
           <p>
             <label>{t('Budget form.Amount')}</label>
@@ -59,7 +62,10 @@ export function BudgetCreate(props: BudgetCreateProps) {
                 setForm({ ...form, amount: parseInt(evt.target.value || '0') });
               }}
             />
-            <ValidationError error={validationError?.['amount']} />
+            <ValidationError
+              error={validationError?.['amount']}
+              param="Budget form.Amount"
+            />
           </p>
           <p>
             <label>{t('Budget form.Date')}</label>
@@ -68,7 +74,10 @@ export function BudgetCreate(props: BudgetCreateProps) {
               value={form.date}
               onChange={(evt) => setForm({ ...form, date: evt.target.value })}
             />
-            <ValidationError error={validationError?.['date']} />
+            <ValidationError
+              error={validationError?.['date']}
+              param="Budget form.Date"
+            />
           </p>
           <p>
             <button type="submit">{t('Budget form.Create')}</button>
@@ -77,6 +86,10 @@ export function BudgetCreate(props: BudgetCreateProps) {
       </form>
 
       <style jsx>{`
+        fieldset {
+          border: 0;
+        }
+
         label {
           margin: 0.5em;
           width: 80px;
