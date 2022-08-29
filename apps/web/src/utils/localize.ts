@@ -41,6 +41,7 @@ function localize() {
                 'string.empty': '{{label}} must not be empty',
                 'number.empty': '{{label}} must not be empty',
                 'number.min': '{{label}} must be greater than or equal to {{limit}}',
+                'number.greater': '{{label}} must be greater than {{limit}}',
                 'date.empty': '{{label}} must not be empty',
                 'date.min': '{{label}} must be greater than or equal to {{limit}}',
               }
@@ -81,6 +82,7 @@ function localize() {
               'Common': {
                 'number.empty': '{{label}} должна быть указана',
                 'number.min': '{{label}} должна быть не меньше {{limit}}',
+                'number.greater': '{{label}} должна быть больше {{limit}}',
                 'date.empty': '{{label}} должна быть указана',
                 'date.min': '{{label}} должна быть не меньше {{limit}}',
               },
