@@ -2,6 +2,6 @@
 
 To start server run `nx serve api`
 
-##nx Client
+## Client
 
 To start server run `nx serve web`
