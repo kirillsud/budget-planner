@@ -1,3 +1,15 @@
+import Container from '@mui/material/Container';
+import Box from '@mui/material/Box';
+import Avatar from '@mui/material/Avatar';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
+import Alert from '@mui/material/Alert';
+import LoadingButton from '@mui/lab/LoadingButton';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
@@ -18,6 +30,7 @@ export interface LoginProps {}
 export function Login(props: LoginProps) {
   const location = useLocation();
   const dispatch = useDispatch();
+  const [checked, setChecked] = useState(true);
   const { t } = useTranslation();
 
   const token = useSelector(selectAuthToken);
@@ -25,57 +38,119 @@ export function Login(props: LoginProps) {
 
   const error = loading instanceof Error ? loading : undefined;
 
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-
   if (token) {
     const path = (location.state as LoginRouteState)?.from ?? '/';
     return <Navigate to={path} />;
   }
 
-  async function login() {
-    dispatch(authThunks.login({ email, password, remember: false }));
+  async function login(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const email = event.currentTarget.elements.namedItem(
+      'email'
+    ) as HTMLInputElement;
+
+    const password = event.currentTarget.elements.namedItem(
+      'password'
+    ) as HTMLInputElement;
+
+    const remember = event.currentTarget.elements.namedItem(
+      'remember'
+    ) as HTMLInputElement;
+
+    dispatch(
+      authThunks.login({
+        email: email.value,
+        password: password.value,
+        remember: remember.checked,
+      })
+    );
   }
 
   return (
-    <>
-      <form>
-        <fieldset disabled={loading === 'loading'}>
-          <label>{t('Login form.Email')}:</label>
-          <input
-            type="text"
-            value={email}
-            onChange={(evt) => setEmail(evt.target.value)}
-          />{' '}
-          <label>{t('Login form.Password')}:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(evt) => setPassword(evt.target.value)}
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+          <LockOutlinedIcon />
+        </Avatar>
+
+        <Typography component="h1" variant="h5">
+          {t('Sign in')}
+        </Typography>
+
+        <Box component="form" onSubmit={login} noValidate sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label={t('Login form.Email')}
+            name="email"
+            type="email"
+            disabled={loading === 'loading'}
+            autoComplete="email"
+            autoFocus
           />
-          <button onClick={login} disabled={loading === 'loading'}>
+
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label={t('Login form.Password')}
+            type="password"
+            id="password"
+            disabled={loading === 'loading'}
+            autoComplete="current-password"
+          />
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={checked}
+                onChange={(event) => setChecked(event.target.checked)}
+                name="remember"
+                color="primary"
+                disabled={loading === 'loading'}
+              />
+            }
+            label={t('Login form.Remember me')}
+          />
+
+          <LoadingButton
+            type="submit"
+            fullWidth
+            variant="contained"
+            loading={loading === 'loading'}
+            sx={{ mt: 3, mb: 2 }}
+          >
             {t('Login form.Submit')}
-          </button>
-          {error && <div>{error.message}</div>}
-        </fieldset>
-      </form>
-      <style jsx>{`
-        fieldset {
-          border: 0;
-        }
-        label {
-          display: block;
-        }
-        input {
-          display: block;
-          margin-bottom: 0.5em;
-        }
-        button {
-          display: block;
-          margin-top: 0.5em;
-        }
-      `}</style>
-    </>
+          </LoadingButton>
+
+          {error && <Alert severity="error">{error.message}</Alert>}
+
+          <Grid container>
+            <Grid item xs>
+              <Link href="#" variant="body2">
+                {t('Forgot password?')}
+              </Link>
+            </Grid>
+            <Grid item>
+              <Link href="#" variant="body2">
+                {t("Don't have an account? Sign Up")}
+              </Link>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
+    </Container>
   );
 }
 

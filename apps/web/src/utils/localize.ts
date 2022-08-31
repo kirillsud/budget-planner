@@ -14,7 +14,9 @@ function localize() {
         en: {
           translation: {
             'Budget planner': 'Budget Planner',
+            'Application loading': 'Loading application...',
             'Not found': '404 Not found :(',
+            'Sign in': 'Sign in',
             'Logout': 'Logout',
             'Locale': 'Locale',
             'Loading': 'Loading...',
@@ -34,7 +36,8 @@ function localize() {
             'Login form': {
               Email: 'Email',
               Password: 'Password',
-              Submit: 'Login',
+              'Remember me': 'Remember me',
+              Submit: 'Sing In',
             },
             'Errors': {
               'Common': {
@@ -51,7 +54,9 @@ function localize() {
         ru: {
           translation: {
             'Budget planner': 'Планирование бюджета',
+            'Application loading': 'Загрузка приложения...',
             'Not found': '404 Страница не найдена :(',
+            'Sign in': 'Авторизация',
             'Logout': 'Выйти',
             'Locale': 'Язык',
             'Loading': 'Выполняет загрузка данных...',
@@ -59,6 +64,8 @@ function localize() {
             'Create expense': 'Добавление расхода',
             'Edit income': 'Редактирование дохода',
             'Edit expense': 'Редактирование расхода',
+            'Forgot password?': 'Забыли пароль?',
+            'Don\'t have an account? Sign Up': 'Нет аккаунта? Зарегистрируйтесь',
             'Budget form': {
               Title: 'Описание',
               Amount: 'Сумма',
@@ -71,6 +78,7 @@ function localize() {
             'Login form': {
               Email: 'Электронная почта',
               Password: 'Пароль',
+              'Remember me': 'Запомнить меня',
               Submit: 'Войти',
             },
             'Errors': {

@@ -9,14 +9,14 @@ import {
   authThunks,
 } from '@planner/auth-web';
 import { BudgetFeature, budgetThunks } from '@planner/budget-web';
-import { Preloader } from '@planner/common-web';
-import ProtectedRoute from './protected-route/protected-route';
-import CssBaseline from '@mui/material/CssBaseline';
 import Stack from '@mui/material/Stack';
+import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import Box from '@mui/material/Box';
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
+import ProtectedRoute from './protected-route/protected-route';
+import AppPreloader from './app-preloader/app-preloader';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -34,12 +34,17 @@ const App = () => {
     dispatch(authThunks.logout());
   }
 
+  if (authLoading === 'loading' && authToken === undefined) {
+    return <AppPreloader />;
+  }
+
   return (
-    <>
-      <CssBaseline />
+    <Container>
       <h1
-      //  sx={{ alignSelf: 'center' }} 
-       >{t('Budget planner')}</h1> //
+      //  sx={{ alignSelf: 'center' }}
+      >
+        {t('Budget planner')}
+      </h1>
 
       <div className="header">
         {authLoading === 'loaded' && authToken && (
@@ -85,33 +90,16 @@ const App = () => {
         </Box>
       </div>
 
-      {authLoading === 'loading' ? (
-        <Preloader />
-      ) : (
-        <Routes>
-          <Route path="/" element={<Navigate to="/budget" />} />
-          <Route
-            path="/budget/*"
-            element={<ProtectedRoute element={<BudgetFeature />} />}
-          />
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<p>{t('Not found')}</p>} />
-        </Routes>
-      )}
-
-      <style jsx>{`
-        .header {
-          display: flex;
-          flex-direction: row-reverse;
-        }
-        .header > * {
-          margin-left: 1em;
-        }
-        .header * + button {
-          margin-left: 0.5em;
-        }
-      `}</style>
-    </>
+      <Routes>
+        <Route path="/" element={<Navigate to="/budget" />} />
+        <Route
+          path="/budget/*"
+          element={<ProtectedRoute element={<BudgetFeature />} />}
+        />
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<p>{t('Not found')}</p>} />
+      </Routes>
+    </Container>
   );
 
   function setLocale(locale: string): void {

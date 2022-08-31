@@ -1,3 +1,4 @@
+import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -15,6 +16,8 @@ const root = ReactDOM.createRoot(
 
 localize();
 
+const theme = createTheme();
+
 // Refresh token on page load
 store.dispatch(authThunks.refresh());
 
@@ -22,7 +25,10 @@ root.render(
   <Provider store={store}>
     <StrictMode>
       <BrowserRouter>
-        <App />
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <App />
+        </ThemeProvider>
       </BrowserRouter>
     </StrictMode>
   </Provider>

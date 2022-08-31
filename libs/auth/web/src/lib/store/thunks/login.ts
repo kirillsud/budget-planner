@@ -39,9 +39,10 @@ export const login = createAsyncThunkWithReducers<AuthState, AuthToken, LoginPar
         state.token = token;
         state.loading = 'loaded';
 
-        localStorage.setItem(authTokenStorageKey, token);
-      }
-      )
+        if (action.meta.arg.remember) {
+          localStorage.setItem(authTokenStorageKey, token);
+        }
+      })
       .addCase(thunk.rejected, (state: AuthState, action) => {
         state.loading = fromUnknownError(action.payload);
       });
