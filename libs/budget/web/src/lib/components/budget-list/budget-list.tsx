@@ -2,6 +2,9 @@ import { useSelector } from 'react-redux';
 import { BudgetRecord } from '@planner/budget-domain';
 import { selectAllBudget } from '../../store';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import CssBaseline from '@mui/material/CssBaseline';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 
 /* eslint-disable-next-line */
 export interface BudgetListProps {}
@@ -41,12 +44,17 @@ export function BudgetList(props: BudgetListProps) {
 
   return (
     <>
+      <CssBaseline />
       <Link to="create/income" state={{ from: location.pathname }}>
-        <button className="menu-button">Добавить доход</button>
+        <Button variant="outlined" className="menu-button">
+          Добавить доход
+        </Button>
       </Link>
 
       <Link to="create/expense" state={{ from: location.pathname }}>
-        <button className="menu-button">Добавить расход</button>
+        <Button variant="outlined" className="menu-button">
+          Добавить расход
+        </Button>
       </Link>
 
       <ul>
@@ -76,9 +84,10 @@ export function BudgetList(props: BudgetListProps) {
           color: hsl(0deg 100% 72%);
         }
 
-        .menu-button {
-          margin-left: 0.5rem;
-        }
+        // .menu-button {
+        //   margin-left: 0.5rem;
+        //   // text-decoration: none;
+        // }
       `}</style>
     </>
   );

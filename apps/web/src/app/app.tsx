@@ -11,6 +11,12 @@ import {
 import { BudgetFeature, budgetThunks } from '@planner/budget-web';
 import { Preloader } from '@planner/common-web';
 import ProtectedRoute from './protected-route/protected-route';
+import CssBaseline from '@mui/material/CssBaseline';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import Box from '@mui/material/Box';
+import { Typography } from '@mui/material';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -30,17 +36,53 @@ const App = () => {
 
   return (
     <>
-      <h1>{t('Budget planner')}</h1>
+      <CssBaseline />
+      <h1
+      //  sx={{ alignSelf: 'center' }} 
+       >{t('Budget planner')}</h1> //
 
       <div className="header">
         {authLoading === 'loaded' && authToken && (
-          <button onClick={logout}>{t('Logout')}</button>
+          <Button
+            sx={{ marginLeft: 2, marginRight: 2 }}
+            variant="contained"
+            size="small"
+            onClick={logout}
+          >
+            {t('Logout')}
+          </Button>
         )}
-        <div>
-          <span>{t('Locale')}</span>
-          <button onClick={() => setLocale('ru')}>рус</button>
-          <button onClick={() => setLocale('en')}>eng</button>
-        </div>
+
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            '& > *': {
+              m: 1,
+            },
+          }}
+        >
+          <ButtonGroup variant="text" aria-label="text button group">
+            {/* <Stack spacing={2} direction="row"> */}
+            <Typography sx={{ alignSelf: 'center' }}>{t('Locale')}</Typography>
+            <Button
+              // variant="outlined"
+              size="small"
+              onClick={() => setLocale('ru')}
+            >
+              рус
+            </Button>
+            <Button
+              // variant="outlined"
+              size="small"
+              onClick={() => setLocale('en')}
+            >
+              eng
+            </Button>
+            {/* </Stack> */}
+          </ButtonGroup>
+        </Box>
       </div>
 
       {authLoading === 'loading' ? (
