@@ -11,7 +11,7 @@ export function AppPreloader(props: AppPreloaderProps) {
   const { t } = useTranslation();
 
   return (
-    <Fade in appear timeout={1000}>
+    <Fade in appear timeout={2000}>
       <Container
         sx={{
           display: 'flex',

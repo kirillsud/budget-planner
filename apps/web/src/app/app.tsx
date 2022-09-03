@@ -17,6 +17,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import ProtectedRoute from './protected-route/protected-route';
 import AppPreloader from './app-preloader/app-preloader';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -34,7 +35,7 @@ const App = () => {
     dispatch(authThunks.logout());
   }
 
-  if (authLoading === 'loading' && authToken === undefined) {
+  if (authLoading === 'refreshing') {
     return <AppPreloader />;
   }
 
@@ -47,15 +48,16 @@ const App = () => {
       </h1>
 
       <div className="header">
-        {authLoading === 'loaded' && authToken && (
-          <Button
+        {authToken && (
+          <LoadingButton
             sx={{ marginLeft: 2, marginRight: 2 }}
             variant="contained"
             size="small"
+            loading={authLoading === 'loading'}
             onClick={logout}
           >
             {t('Logout')}
-          </Button>
+          </LoadingButton>
         )}
 
         <Box

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BudgetRecord, TimestampInMsec } from '@planner/budget-domain';
-import { HttpValidationError, ValidationError } from '@planner/common-web';
+import { HttpValidationError, ErrorAlert } from '@planner/common-web';
 import { budgetThunks, selectBudgetCreating } from '../../store';
 
 export interface BudgetCreateProps {
@@ -48,7 +48,7 @@ export function BudgetCreate(props: BudgetCreateProps) {
               value={form.title}
               onChange={(evt) => setForm({ ...form, title: evt.target.value })}
             />
-            <ValidationError
+            <ErrorAlert
               error={validationError?.['title']}
               param="Budget form.Title"
             />
@@ -62,7 +62,7 @@ export function BudgetCreate(props: BudgetCreateProps) {
                 setForm({ ...form, amount: parseInt(evt.target.value || '0') });
               }}
             />
-            <ValidationError
+            <ErrorAlert
               error={validationError?.['amount']}
               param="Budget form.Amount"
             />
@@ -74,7 +74,7 @@ export function BudgetCreate(props: BudgetCreateProps) {
               value={form.date}
               onChange={(evt) => setForm({ ...form, date: evt.target.value })}
             />
-            <ValidationError
+            <ErrorAlert
               error={validationError?.['date']}
               param="Budget form.Date"
             />

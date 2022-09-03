@@ -1,4 +1,5 @@
-import { Context } from 'joi';
+import { ErrorBase } from '@planner/common/core';
+import { t } from 'i18next';
 
 export type SourceType =
   | 'params'
@@ -21,8 +22,12 @@ export interface ValidationErrors {
   };
 }
 
-export interface ErrorBase {
-  message: string;
-  type: string;
-  context: Context;
+export function translateError(error: ErrorBase, field: string): string {
+  const params = {
+    ...error.context,
+    label: t(field),
+  };
+
+  return t(`Errors.Messages.${field}.${error.type}`, '', params) ||
+    t(`Errors.Common.${error.type}`, error.message, params);
 }

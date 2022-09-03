@@ -1,6 +1,6 @@
 import { AuthToken } from '@planner/auth-web';
 import { BudgetRecord } from '@planner/budget-domain';
-import { config, HttpValidationError } from '@planner/common-web';
+import { config, processResponse } from '@planner/common-web';
 
 const { apiUrl } = config();
 
@@ -65,29 +65,4 @@ function requestHeaders(auth: string): HeadersInit {
     'Content-Type': 'application/json',
     Authorization: auth,
   };
-}
-
-async function processResponse<T>(response: Response): Promise<T> {
-  if (response.status === 204) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return undefined as any as T;
-  }
-
-  const data: T | Error | HttpValidationError = await response.json();
-
-  if (response.status >= 200 && response.status < 300) {
-    return data as T;
-  }
-
-  const message = ('message' in data && data.message) || 'Unknown error';
-
-  let error: Error | HttpValidationError;
-
-  if ('validation' in data) {
-    error = new HttpValidationError(data.validation);
-  } else {
-    error = new Error(message);
-  }
-
-  throw error;
 }

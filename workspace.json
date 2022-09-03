@@ -5,6 +5,7 @@
     "auth-web": "libs/auth/web",
     "budget-domain": "libs/budget/domain",
     "budget-web": "libs/budget/web",
+    "common-core": "libs/common/core",
     "common-web": "libs/common/web",
     "web": "apps/web",
     "web-e2e": "apps/web-e2e"

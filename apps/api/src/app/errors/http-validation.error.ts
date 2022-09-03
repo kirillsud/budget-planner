@@ -1,6 +1,7 @@
+import { ErrorBase } from '@planner/common/core';
+import * as Joi from 'joi';
 import { CelebrateError } from 'celebrate';
 import { HttpError } from './http.error';
-import * as Joi from 'joi';
 
 type ValidationLocation =
   | 'params'
@@ -9,12 +10,6 @@ type ValidationLocation =
   | 'cookies'
   | 'signedCookies'
   | 'body';
-
-export type ErrorBase = {
-  type: string;
-  message: string;
-  context: Joi.Context;
-};
 
 export interface ValidationError extends ErrorBase {
   location: ValidationLocation;

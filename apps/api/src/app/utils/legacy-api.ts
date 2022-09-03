@@ -1,3 +1,4 @@
+import * as Joi from 'joi';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BudgetRecord, TimestampInMsec } from '@planner/budget-domain';
 import { HttpAuthorizationError } from '../errors/http-authorization.error';
@@ -5,7 +6,7 @@ import { HttpNotFoundError } from '../errors/http-not-found.error copy';
 import { fromJoiError } from '../errors/http-validation.error';
 import { AuthToken } from '../middleware/auth';
 import { API_URL } from './config';
-import * as Joi from 'joi';
+import { HttpError } from '../errors/http.error';
 
 type TimestampInSec = number & { type: 'timestamp-in-sec' };
 
@@ -62,8 +63,11 @@ export class LegacyApi {
     );
 
     if (typeof data === 'number') {
-      const message = data === -3 ? 'Invalid email or password' : undefined;
-      throw new HttpAuthorizationError(message);
+      if (data === -3) {
+        throw new HttpError(400, 'Invalid email or password', 'auth.wrong-credentials');
+      } else {
+        throw new HttpError(500);
+      }
     }
 
     return data;
@@ -331,7 +335,7 @@ function processUpdateError(
   }
 }
 
-function createValidationError(field: string, schema: Joi.Schema): Error {
+function createValidationError(_field: string, schema: Joi.Schema): Error {
   return fromJoiError(Joi.object({
     'id': schema
   }).validate({}).error, 'body');
@@ -341,15 +345,15 @@ function processLoginResponse<T>(response: number | T): T {
   if (typeof response === 'number') {
     switch (response) {
       case 0:
-        throw new HttpAuthorizationError('Already logged in');
+        throw new HttpError(403, 'Already logged in', 'user.logged-in');
       case -1:
       case -2:
       case -3:
-        throw new HttpAuthorizationError('Invalid email or password');
+        throw new HttpError(400, 'Invalid email or password', 'auth.wrong-credentials');
       case -5:
-        throw new HttpAuthorizationError('User is not activated');
+        throw new HttpError(403, 'User is not activated', 'user.not-activated');
       case -6:
-        throw new HttpAuthorizationError('User is blocked');
+        throw new HttpError(403, 'User is blocked', 'user.blocked');
       default:
         throw new HttpAuthorizationError();
     }

@@ -1,4 +1,4 @@
-import { config, createAsyncThunkWithReducers, fromUnknownError } from '@planner/common-web';
+import { config, createAsyncThunkWithReducers, fromUnknownError, processResponse } from '@planner/common-web';
 import { AuthState, AuthToken, authTokenStorageKey } from '../constants';
 
 const { apiUrl } = config();
@@ -20,14 +20,12 @@ export const login = createAsyncThunkWithReducers<AuthState, AuthToken, LoginPar
       body: JSON.stringify(authData),
     });
 
-    const data = await response.json();
-    const jwt = data.jwt;
-
-    if (response.status !== 200 || !jwt) {
-      return thunkAPI.rejectWithValue(data.message);
+    try {
+      const data = await processResponse<{ jwt: AuthToken }>(response);
+      return data.jwt;
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue(error);
     }
-
-    return data.jwt;
   },
   (thunk, builder) => {
     builder

@@ -8,5 +8,5 @@ export type AuthToken = string;
 
 export interface AuthState {
   token: AuthToken | null;
-  loading: LoadingState<'not loaded'>;
+  loading: LoadingState<'not loaded'> | 'refreshing';
 }

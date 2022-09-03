@@ -6,7 +6,7 @@ import { TimestampInMsec } from '@planner/budget-domain';
 import {
   HttpValidationError,
   Preloader,
-  ValidationError,
+  ErrorAlert,
 } from '@planner/common-web';
 import { selectBudgetById, budgetThunks } from '../../store';
 
@@ -77,7 +77,7 @@ export function BudgetEdit(props: BudgetEditProps) {
               value={form.title}
               onChange={(evt) => setForm({ ...form, title: evt.target.value })}
             />
-            <ValidationError
+            <ErrorAlert
               error={validationError?.['title']}
               param="Budget form.Title"
             />
@@ -91,7 +91,7 @@ export function BudgetEdit(props: BudgetEditProps) {
                 setForm({ ...form, amount: parseInt(evt.target.value || '0') })
               }
             />
-            <ValidationError
+            <ErrorAlert
               error={validationError?.['amount']}
               param="Budget form.Amount"
             />
@@ -103,7 +103,7 @@ export function BudgetEdit(props: BudgetEditProps) {
               value={form.date}
               onChange={(evt) => setForm({ ...form, date: evt.target.value })}
             />
-            <ValidationError
+            <ErrorAlert
               error={validationError?.['date.from']}
               param="Budget form.Date"
             />

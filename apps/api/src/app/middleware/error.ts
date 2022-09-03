@@ -1,3 +1,4 @@
+import { UNKNOWN_ERROR } from '@planner/common/core';
 import { isCelebrateError } from 'celebrate';
 import * as express from 'express';
 import { environment } from '../../environments/environment';
@@ -18,20 +19,18 @@ export function error(
   }
 
   const statusCode = error instanceof HttpError ? error.statusCode : 500;
-  const message =
-    error instanceof HttpError ? error.message : 'Internal server error';
-  const debug =
-    statusCode === 500 && !environment.production
+  const type = error instanceof HttpError ? error.type : UNKNOWN_ERROR;
+  const message = error instanceof HttpError ? error.message : 'Unknown error';
+  const validation = error instanceof HttpValidationError ? error.errors : undefined;
+  const debug = statusCode === 500 && !environment.production
       ? error.toString()
-      : undefined;
-  const validation =
-    error instanceof HttpValidationError ? error.errors : undefined;
+    : undefined;
 
   if (!(error instanceof HttpError)) {
     console.log(error);
   }
 
-  res.status(statusCode).send({ message, debug, validation });
+  res.status(statusCode).send({ message, type, debug, validation });
 
   next();
 }

@@ -30,7 +30,7 @@ export const refresh = createAsyncThunkWithReducers<AuthState, AuthToken>(
   (thunk, builder) => {
     builder
       .addCase(thunk.pending, (state) => {
-        state.loading = 'loading';
+        state.loading = 'refreshing';
       })
       .addCase(thunk.fulfilled, (state, action) => {
         state.token = action.payload;
@@ -38,7 +38,7 @@ export const refresh = createAsyncThunkWithReducers<AuthState, AuthToken>(
 
         localStorage.setItem(authTokenStorageKey, state.token);
       })
-      .addCase(thunk.rejected, (state: AuthState, action) => {
+      .addCase(thunk.rejected, (state: AuthState) => {
         state.token = null;
         state.loading = 'not loaded';
       });

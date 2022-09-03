@@ -15,7 +15,7 @@ function localize() {
           translation: {
             'Budget planner': 'Budget Planner',
             'Application loading': 'Loading application...',
-            'Not found': '404 Not found :(',
+            'Not found': '404 Not found 😭',
             'Sign in': 'Sign in',
             'Logout': 'Logout',
             'Locale': 'Locale',
@@ -47,6 +47,10 @@ function localize() {
                 'number.greater': '{{label}} must be greater than {{limit}}',
                 'date.empty': '{{label}} must not be empty',
                 'date.min': '{{label}} must be greater than or equal to {{limit}}',
+                'string.email': '{{label}} has invalid format',
+                'string.min': '{{label}} must be at least {{limit}} characters long',
+                'auth.wrong-credentials': 'Wrong email or password',
+                'unknown': 'Unexpected error 😭',
               }
             },
           },
@@ -55,7 +59,7 @@ function localize() {
           translation: {
             'Budget planner': 'Планирование бюджета',
             'Application loading': 'Загрузка приложения...',
-            'Not found': '404 Страница не найдена :(',
+            'Not found': '404 Страница не найдена 😭',
             'Sign in': 'Авторизация',
             'Logout': 'Выйти',
             'Locale': 'Язык',
@@ -86,6 +90,10 @@ function localize() {
                 'Budget form.Title': {
                   'string.empty': '{{label}} должно быть указано',
                 },
+                'Login form.Password': {
+                  'string.empty': '{{label}} должен быть указан',
+                  'string.min': 'Длина пароля должна быть не менее {{limit}} символов',
+                },
               },
               'Common': {
                 'number.empty': '{{label}} должна быть указана',
@@ -93,6 +101,11 @@ function localize() {
                 'number.greater': '{{label}} должна быть больше {{limit}}',
                 'date.empty': '{{label}} должна быть указана',
                 'date.min': '{{label}} должна быть не меньше {{limit}}',
+                'string.empty': '{{label}} должна быть указана',
+                'string.email': 'Адрес электронной почты указан в неверном формате',
+                'string.min': '{{label}} должен быть не менее {{limit}} символов',
+                'auth.wrong-credentials': 'Неверный адрес электронной почты или пароль',
+                'unknown': 'Неизвестная ошибка 😭',
               },
             }
           },

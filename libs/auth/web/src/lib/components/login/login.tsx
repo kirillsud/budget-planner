@@ -8,12 +8,16 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Grid from '@mui/material/Grid';
 import Link from '@mui/material/Link';
-import Alert from '@mui/material/Alert';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import {
+  ErrorAlert,
+  HttpValidationError,
+  translateError,
+} from '@planner/common-web';
 import {
   authThunks,
   selectAuthLoadingStatus,
@@ -37,6 +41,17 @@ export function Login(props: LoginProps) {
   const loading = useSelector(selectAuthLoadingStatus);
 
   const error = loading instanceof Error ? loading : undefined;
+
+  const commonError = !(error instanceof HttpValidationError)
+    ? error
+    : undefined;
+
+  const validationError =
+    (error instanceof HttpValidationError && error.validation['body']) ||
+    undefined;
+
+  const emailError = fieldError('email');
+  const passwordError = fieldError('password');
 
   if (token) {
     const path = (location.state as LoginRouteState)?.from ?? '/';
@@ -67,6 +82,14 @@ export function Login(props: LoginProps) {
     );
   }
 
+  function fieldError(field: string) {
+    const errorData = validationError?.[field];
+    const capitalizedField = field.charAt(0).toUpperCase() + field.slice(1);
+    return errorData
+      ? translateError(errorData, `Login form.${capitalizedField}`)
+      : undefined;
+  }
+
   return (
     <Container component="main" maxWidth="xs">
       <Box
@@ -86,6 +109,8 @@ export function Login(props: LoginProps) {
         </Typography>
 
         <Box component="form" onSubmit={login} noValidate sx={{ mt: 1 }}>
+          {commonError && <ErrorAlert param="" error={commonError} />}
+
           <TextField
             margin="normal"
             required
@@ -97,6 +122,8 @@ export function Login(props: LoginProps) {
             disabled={loading === 'loading'}
             autoComplete="email"
             autoFocus
+            error={!!emailError}
+            helperText={emailError}
           />
 
           <TextField
@@ -109,6 +136,8 @@ export function Login(props: LoginProps) {
             id="password"
             disabled={loading === 'loading'}
             autoComplete="current-password"
+            error={!!passwordError}
+            helperText={passwordError}
           />
 
           <FormControlLabel
@@ -133,8 +162,6 @@ export function Login(props: LoginProps) {
           >
             {t('Login form.Submit')}
           </LoadingButton>
-
-          {error && <Alert severity="error">{error.message}</Alert>}
 
           <Grid container>
             <Grid item xs>

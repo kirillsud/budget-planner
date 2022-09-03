@@ -18,7 +18,8 @@
       "@planner/auth-web": ["libs/auth/web/src/index.ts"],
       "@planner/budget-domain": ["libs/budget/domain/src/index.ts"],
       "@planner/budget-web": ["libs/budget/web/src/index.ts"],
-      "@planner/common-web": ["libs/common/web/src/index.ts"]
+      "@planner/common-web": ["libs/common/web/src/index.ts"],
+      "@planner/common/core": ["libs/common/core/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
