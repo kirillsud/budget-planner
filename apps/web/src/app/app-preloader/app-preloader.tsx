@@ -27,7 +27,7 @@ export function AppPreloader(props: AppPreloaderProps) {
         <Typography variant="subtitle1" gutterBottom>
           {t('Application loading')}
         </Typography>
-        <CircularProgress />
+        <CircularProgress size={60} />
       </Container>
     </Fade>
   );

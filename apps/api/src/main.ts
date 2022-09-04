@@ -1,6 +1,5 @@
 import * as express from 'express';
 import * as cors from 'cors';
-import { isCelebrateError } from 'celebrate';
 import { auth } from './app/middleware/auth';
 import { error } from './app/middleware/error';
 import authRouter from './app/routes/auth.routes';

@@ -1,5 +1,4 @@
 import { ErrorBase } from '@planner/common/core';
-import { t } from 'i18next';
 
 export type SourceType =
   | 'params'
@@ -20,14 +19,4 @@ export interface ValidationErrors {
   [type: string]: {
     [path: string]: ErrorBase;
   };
-}
-
-export function translateError(error: ErrorBase, field: string): string {
-  const params = {
-    ...error.context,
-    label: t(field),
-  };
-
-  return t(`Errors.Messages.${field}.${error.type}`, '', params) ||
-    t(`Errors.Common.${error.type}`, error.message, params);
 }

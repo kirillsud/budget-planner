@@ -1,10 +1,10 @@
 import { useSelector } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
+import { Preloader } from '@planner/common-web';
 import { selectBudgetLoading } from './store/selectors';
 import BudgetCreate from './components/budget-create/budget-create';
 import BudgetEdit from './components/budget-edit/budget-edit';
 import BudgetList from './components/budget-list/budget-list';
-import { Preloader } from '@planner/common-web';
 
 /* eslint-disable-next-line */
 export interface BudgetFeatureProps {}

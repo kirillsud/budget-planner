@@ -3,8 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BudgetRecord, TimestampInMsec } from '@planner/budget-domain';
-import { HttpValidationError, ErrorAlert } from '@planner/common-web';
+import { ErrorAlert, getFormErrors } from '@planner/common-web';
 import { budgetThunks, selectBudgetCreating } from '../../store';
+import Container from '@mui/material/Container';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 export interface BudgetCreateProps {
   type: BudgetRecord['type'];
@@ -14,109 +19,120 @@ export function BudgetCreate(props: BudgetCreateProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  const loading = useSelector(selectBudgetCreating);
   const { t } = useTranslation();
 
   const { type } = props;
-  const date = new Date().toISOString().substring(0, 10);
-
-  const loading = useSelector(selectBudgetCreating);
-
-  const [form, setForm] = useState({
-    title: '',
-    amount: 0,
-    date,
-  });
 
   const error = loading instanceof Error ? loading : undefined;
-  const stringError = !(error instanceof HttpValidationError)
-    ? error?.message
-    : undefined;
-  const validationError =
-    error instanceof HttpValidationError ? error.validation['body'] : undefined;
+  const formErrors = error && getFormErrors(error, 'Budget form');
+
+  const titleError = formErrors?.fields?.['title']?.();
+  const amountError = formErrors?.fields?.['amount']?.();
+  const dateError = formErrors?.fields?.['date.from']?.();
 
   return (
-    <div>
-      <h2>{type === 'income' ? t('Create income') : t('Create expense')}</h2>
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h1" variant="h5">
+          {type === 'income' ? t('Create income') : t('Create expense')}
+        </Typography>
 
-      <form onSubmit={submit}>
-        {stringError && <div>{stringError}</div>}
-        <fieldset disabled={loading === 'loading'}>
-          <p>
-            <label>{t('Budget form.Title')}</label>
-            <input
-              type="text"
-              value={form.title}
-              onChange={(evt) => setForm({ ...form, title: evt.target.value })}
-            />
-            <ErrorAlert
-              error={validationError?.['title']}
-              param="Budget form.Title"
-            />
-          </p>
-          <p>
-            <label>{t('Budget form.Amount')}</label>
-            <input
-              type="number"
-              value={form.amount}
-              onChange={(evt) => {
-                setForm({ ...form, amount: parseInt(evt.target.value || '0') });
-              }}
-            />
-            <ErrorAlert
-              error={validationError?.['amount']}
-              param="Budget form.Amount"
-            />
-          </p>
-          <p>
-            <label>{t('Budget form.Date')}</label>
-            <input
-              type="date"
-              value={form.date}
-              onChange={(evt) => setForm({ ...form, date: evt.target.value })}
-            />
-            <ErrorAlert
-              error={validationError?.['date']}
-              param="Budget form.Date"
-            />
-          </p>
-          <p>
-            <button type="submit">{t('Budget form.Create')}</button>
-          </p>
-        </fieldset>
-      </form>
+        {formErrors?.common && (
+          <ErrorAlert param="" error={formErrors.common} />
+        )}
 
-      <style jsx>{`
-        fieldset {
-          border: 0;
-        }
+        <Box component="form" onSubmit={submit} noValidate sx={{ mt: 1 }}>
+          {formErrors?.common && (
+            <ErrorAlert param="" error={formErrors.common} />
+          )}
 
-        label {
-          margin: 0.5em;
-          width: 80px;
-          display: inline-block;
-        }
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="title"
+            label={t('Budget form.Title')}
+            name="title"
+            type="text"
+            disabled={loading === 'loading'}
+            autoComplete="budget-title"
+            autoFocus
+            error={!!titleError}
+            helperText={titleError}
+          />
 
-        input {
-          width: 200px;
-        }
-      `}</style>
-    </div>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="amount"
+            label={t('Budget form.Amount')}
+            type="number"
+            id="amount"
+            disabled={loading === 'loading'}
+            error={!!amountError}
+            helperText={amountError}
+          />
+
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="date"
+            label={t('Budget form.Date.from')}
+            type="date"
+            id="date"
+            disabled={loading === 'loading'}
+            error={!!dateError}
+            helperText={dateError}
+            InputLabelProps={{ shrink: true }}
+          />
+
+          <LoadingButton
+            type="submit"
+            fullWidth
+            variant="contained"
+            loading={loading === 'loading'}
+            sx={{ mt: 3, mb: 2 }}
+          >
+            {t('Budget form.Create')}
+          </LoadingButton>
+        </Box>
+      </Box>
+    </Container>
   );
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const date = new Date(form.date).valueOf() as TimestampInMsec;
+    const form = event.currentTarget.elements;
+
+    const title = form.namedItem('title') as HTMLInputElement;
+    const amount = form.namedItem('amount') as HTMLInputElement;
+    const date = form.namedItem('date') as HTMLInputElement;
+
+    const timestamp = date.value
+      ? (new Date(date.value).getTime() as TimestampInMsec)
+      : undefined;
 
     const result = await dispatch(
       budgetThunks.createOne({
-        ...form,
+        title: title.value,
+        amount: amount.value ? Number(amount.value) : undefined,
         type,
         date: {
-          from: date,
-          to: date,
+          from: timestamp,
+          to: timestamp,
         },
-      })
+      } as BudgetRecord)
     );
 
     if (!result.error) {

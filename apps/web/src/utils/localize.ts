@@ -28,7 +28,7 @@ function localize() {
               Title: 'Title',
               Amount: 'Amount',
               Currency: 'Currency',
-              Date: 'Date',
+              'Date.from': 'Date',
               Create: 'Create',
               Save: 'Save',
               Delete: 'Delete',
@@ -41,6 +41,7 @@ function localize() {
             },
             'Errors': {
               'Common': {
+                'any.required': '{{label}} must not be empty',
                 'string.empty': '{{label}} must not be empty',
                 'number.empty': '{{label}} must not be empty',
                 'number.min': '{{label}} must be greater than or equal to {{limit}}',
@@ -74,7 +75,7 @@ function localize() {
               Title: 'Описание',
               Amount: 'Сумма',
               Currency: 'Валюта',
-              Date: 'Дата',
+              'Date.from': 'Дата',
               Create: 'Создать',
               Save: ' Сохранить',
               Delete: 'Удалить',
@@ -96,9 +97,11 @@ function localize() {
                 },
               },
               'Common': {
+                'any.required': '{{label}} должна быть указана',
                 'number.empty': '{{label}} должна быть указана',
                 'number.min': '{{label}} должна быть не меньше {{limit}}',
                 'number.greater': '{{label}} должна быть больше {{limit}}',
+                'date.base': '{{label}} указана в неверном формате',
                 'date.empty': '{{label}} должна быть указана',
                 'date.min': '{{label}} должна быть не меньше {{limit}}',
                 'string.empty': '{{label}} должна быть указана',

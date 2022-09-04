@@ -13,11 +13,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  ErrorAlert,
-  HttpValidationError,
-  translateError,
-} from '@planner/common-web';
+import { ErrorAlert, getFormErrors } from '@planner/common-web';
 import {
   authThunks,
   selectAuthLoadingStatus,
@@ -41,17 +37,10 @@ export function Login(props: LoginProps) {
   const loading = useSelector(selectAuthLoadingStatus);
 
   const error = loading instanceof Error ? loading : undefined;
+  const formErrors = error && getFormErrors(error, 'Login form');
 
-  const commonError = !(error instanceof HttpValidationError)
-    ? error
-    : undefined;
-
-  const validationError =
-    (error instanceof HttpValidationError && error.validation['body']) ||
-    undefined;
-
-  const emailError = fieldError('email');
-  const passwordError = fieldError('password');
+  const emailError = formErrors?.fields?.['email']?.();
+  const passwordError = formErrors?.fields?.['password']?.();
 
   if (token) {
     const path = (location.state as LoginRouteState)?.from ?? '/';
@@ -82,14 +71,6 @@ export function Login(props: LoginProps) {
     );
   }
 
-  function fieldError(field: string) {
-    const errorData = validationError?.[field];
-    const capitalizedField = field.charAt(0).toUpperCase() + field.slice(1);
-    return errorData
-      ? translateError(errorData, `Login form.${capitalizedField}`)
-      : undefined;
-  }
-
   return (
     <Container component="main" maxWidth="xs">
       <Box
@@ -109,7 +90,9 @@ export function Login(props: LoginProps) {
         </Typography>
 
         <Box component="form" onSubmit={login} noValidate sx={{ mt: 1 }}>
-          {commonError && <ErrorAlert param="" error={commonError} />}
+          {formErrors?.common && (
+            <ErrorAlert param="" error={formErrors.common} />
+          )}
 
           <TextField
             margin="normal"
