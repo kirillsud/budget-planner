@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import LoadingButton from '@mui/lab/LoadingButton';
+import Button from '@mui/material/Button';
 
 export interface BudgetCreateProps {
   type: BudgetRecord['type'];
@@ -21,6 +22,14 @@ export function BudgetCreate(props: BudgetCreateProps) {
   const dispatch = useDispatch();
   const loading = useSelector(selectBudgetCreating);
   const { t } = useTranslation();
+
+  useEffect(() => {
+    dispatch(budgetThunks.resetCreating());
+
+    return () => {
+      dispatch(budgetThunks.resetCreating());
+    };
+  }, [dispatch]);
 
   const { type } = props;
 
@@ -39,6 +48,7 @@ export function BudgetCreate(props: BudgetCreateProps) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          '& button': { mt: 1, mb: 1 },
         }}
       >
         <Typography component="h1" variant="h5">
@@ -100,15 +110,25 @@ export function BudgetCreate(props: BudgetCreateProps) {
             type="submit"
             fullWidth
             variant="contained"
+            color="success"
             loading={loading === 'loading'}
-            sx={{ mt: 3, mb: 2 }}
           >
             {t('Budget form.Create')}
           </LoadingButton>
+
+          <Button onClick={navigateBack} fullWidth variant="outlined">
+            {t('Budget form.Cancel')}
+          </Button>
         </Box>
       </Box>
     </Container>
   );
+
+  function navigateBack() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const returnUrl = (location.state as any)?.from || '../../';
+    navigate(returnUrl);
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -136,9 +156,7 @@ export function BudgetCreate(props: BudgetCreateProps) {
     );
 
     if (!result.error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const state = location.state as any;
-      navigate(state?.['from'] || '../../');
+      navigateBack();
     }
   }
 }

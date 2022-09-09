@@ -79,7 +79,7 @@ router.put(
       [Segments.BODY]: Joi.object().keys({
         type: Joi.string().valid('income', 'expense').required(),
         title: Joi.string().required(),
-        amount: Joi.number().min(0).required(),
+        amount: Joi.number().greater(0).required(),
         date: Joi.object().keys({
           from: Joi.date().required(),
           to: Joi.date().required().min(Joi.ref('from')),

@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, EntityId, PayloadAction } from '@reduxjs/toolkit';
 import { BudgetState, BUDGET_FEATURE_KEY } from './constants';
 import { budgetAdapter } from './adapter';
 import { fetchAll } from './thunks/fetch';
@@ -16,6 +16,16 @@ const budgetSlice = createSlice({
   initialState: initialBudgetState,
   reducers: {
     removeAll: budgetAdapter.removeAll,
+    resetCreating: (state) => {
+      state.creating = 'not created';
+    },
+    resetOneLoading: (state, action: PayloadAction<EntityId>) =>
+      budgetAdapter.updateOne(state, {
+        id: action.payload,
+        changes: {
+          loading: 'loaded',
+        },
+      })
   },
   extraReducers: (builder) => {
     fetchAll.reducers(builder, budgetAdapter);
@@ -34,4 +44,6 @@ export const budgetThunks = {
   createOne,
   updateOne,
   removeOne,
+  resetCreating: budgetActions.resetCreating,
+  resetOneLoading: budgetActions.resetOneLoading,
 };

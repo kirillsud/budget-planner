@@ -8,7 +8,9 @@ const store = configureStore({
     [AUTH_FEATURE_KEY]: authReducer,
   },
   // Additional middleware can be passed to this array
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+    serializableCheck: false
+  }),
   devTools: process.env['NODE_ENV'] !== 'production',
   // Optional Redux store enhancers
   enhancers: [],

@@ -32,6 +32,7 @@ function localize() {
               Create: 'Create',
               Save: 'Save',
               Delete: 'Delete',
+              Cancel: 'Cancel',
             },
             'Login form': {
               Email: 'Email',
@@ -79,6 +80,7 @@ function localize() {
               Create: 'Создать',
               Save: ' Сохранить',
               Delete: 'Удалить',
+              Cancel: 'Отмена',
             },
             'Login form': {
               Email: 'Электронная почта',
