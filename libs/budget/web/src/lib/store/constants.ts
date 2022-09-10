@@ -1,4 +1,4 @@
-import { BudgetRecord } from '@planner/budget-domain';
+import { BudgetRecord } from '@planner/budget-core';
 import { LoadingState } from '@planner/common-web';
 import { EntityState } from '@reduxjs/toolkit';
 

@@ -3,16 +3,6 @@
   "sourceRoot": "libs/common/core/src",
   "projectType": "library",
   "targets": {
-    "build": {
-      "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/libs/common/core",
-        "main": "libs/common/core/src/index.ts",
-        "tsConfig": "libs/common/core/tsconfig.lib.json",
-        "assets": ["libs/common/core/*.md"]
-      }
-    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
@@ -29,5 +19,11 @@
       }
     }
   },
-  "tags": ["scope:common", "type:utils"]
+  "tags": [
+    "feature:common",
+    "type:utils",
+    "type:domain",
+    "scope:web",
+    "scope:api"
+  ]
 }

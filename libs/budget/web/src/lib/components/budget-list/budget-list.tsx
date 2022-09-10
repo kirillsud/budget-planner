@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { BudgetRecord } from '@planner/budget-domain';
+import { BudgetRecord } from '@planner/budget-core';
 import { selectAllBudget } from '../../store';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';

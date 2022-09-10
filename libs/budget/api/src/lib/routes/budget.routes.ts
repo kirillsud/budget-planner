@@ -1,22 +1,21 @@
 import { Router } from 'express';
 import { celebrate, Joi, Segments } from 'celebrate';
-import { BudgetRecord } from '@planner/budget-domain';
-import { AuthRequest } from '../middleware/auth';
-import { catchAsync } from '../utils/express';
+import { BudgetRecord } from '@planner/budget-core';
+import { catchAsync } from '@planner/common-api';
 import { legacyApi } from '../utils/legacy-api';
 
-const router = Router();
+export const router = Router();
 
 router.get(
-  '/api/budget',
-  catchAsync(async (req: AuthRequest, res) => {
-    const records = await legacyApi.getAll(req.auth);
+  '/',
+  catchAsync(async (_req, res) => {
+    const records = await legacyApi.getAll(res.locals['auth']);
     res.send(records);
   })
 );
 
 router.post(
-  '/api/budget/:id',
+  '/:id',
   celebrate(
     {
       [Segments.PARAMS]: Joi.object().keys({
@@ -36,20 +35,20 @@ router.post(
       abortEarly: false,
     }
   ),
-  catchAsync(async (req: AuthRequest, res) => {
+  catchAsync(async (req, res) => {
     const id = parseInt(req.params['id']);
     const change: BudgetRecord = {
       ...req.body,
       id,
     };
 
-    const record = await legacyApi.updateOrCreate(req.auth, change);
+    const record = await legacyApi.updateOrCreate(res.locals['auth'], change);
     res.send(record);
   })
 );
 
 router.delete(
-  '/api/budget/:id',
+  '/:id',
   celebrate(
     {
       [Segments.PARAMS]: Joi.object().keys({
@@ -63,17 +62,17 @@ router.delete(
       abortEarly: false,
     }
   ),
-  catchAsync(async (req: AuthRequest, res) => {
+  catchAsync(async (req, res) => {
     const id = parseInt(req.params['id']);
     const type: BudgetRecord['type'] = req.body.type;
 
-    await legacyApi.remove(req.auth, id, type);
+    await legacyApi.remove(res.locals['auth'], id, type);
     res.status(204).send();
   })
 );
 
 router.put(
-  '/api/budget',
+  '/',
   celebrate(
     {
       [Segments.BODY]: Joi.object().keys({
@@ -90,14 +89,12 @@ router.put(
       abortEarly: false,
     }
   ),
-  catchAsync(async (req: AuthRequest, res) => {
+  catchAsync(async (req, res) => {
     const data: Omit<BudgetRecord, 'id'> = {
       ...req.body,
     };
 
-    const record = await legacyApi.updateOrCreate(req.auth, data);
+    const record = await legacyApi.updateOrCreate(res.locals['auth'], data);
     res.status(201).send(record);
   })
 );
-
-export default router;

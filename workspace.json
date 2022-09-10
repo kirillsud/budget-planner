@@ -2,9 +2,12 @@
   "version": 2,
   "projects": {
     "api": "apps/api",
+    "auth-api": "libs/auth/api",
     "auth-web": "libs/auth/web",
-    "budget-domain": "libs/budget/domain",
+    "budget-api": "libs/budget/api",
+    "budget-core": "libs/budget/core",
     "budget-web": "libs/budget/web",
+    "common-api": "libs/common/api",
     "common-core": "libs/common/core",
     "common-web": "libs/common/web",
     "web": "apps/web",

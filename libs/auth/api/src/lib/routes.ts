@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import { celebrate, Joi, Segments } from 'celebrate';
-import { auth, AuthRequest } from '../middleware/auth';
-import { catchAsync } from '../utils/express';
-import { legacyApi } from '../utils/legacy-api';
-import { generateJwt } from '../utils/jwt';
+import { catchAsync } from '@planner/common-api';
+import { guard } from './guard';
+import { legacyApi } from './legacy-api';
+import { generateJwt } from './jwt';
 
-const router = Router();
+export const router = Router();
 
 router.post(
-  '/api/auth/login',
+  '/login',
   celebrate(
     {
       [Segments.BODY]: Joi.object().keys({
@@ -34,23 +34,21 @@ router.post(
 );
 
 router.get(
-  '/api/auth/logout',
-  auth,
-  catchAsync(async (req: AuthRequest, res) => {
-    await legacyApi.logout(req.auth);
+  '/logout',
+  guard,
+  catchAsync(async (_req, res) => {
+    await legacyApi.logout(res.locals['auth']);
     res.send();
   })
 );
 
 router.get(
-  '/api/auth/refresh',
-  auth,
-  catchAsync(async (req: AuthRequest, res) => {
-    const token = await legacyApi.refresh(req.auth);
+  '/refresh',
+  guard,
+  catchAsync(async (_req, res) => {
+    const token = await legacyApi.refresh(res.locals['auth']);
     const jwt = generateJwt(token);
 
     res.send({ jwt });
   })
 );
-
-export default router;

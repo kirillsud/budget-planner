@@ -1,4 +1,4 @@
-import { ErrorBase, UNKNOWN_ERROR } from '@planner/common/core';
+import { ErrorBase, UNKNOWN_ERROR } from '@planner/common-core';
 import { HttpError } from './error';
 import { HttpValidationError } from './validation';
 

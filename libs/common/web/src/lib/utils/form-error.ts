@@ -1,4 +1,4 @@
-import { ErrorBase } from '@planner/common/core';
+import { ErrorBase } from '@planner/common-core';
 import { t } from 'i18next';
 import { HttpValidationError } from './validation';
 

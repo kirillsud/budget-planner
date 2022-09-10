@@ -1,6 +1,6 @@
-import { ErrorBase } from '@planner/common/core';
 import * as Joi from 'joi';
 import { CelebrateError } from 'celebrate';
+import { ErrorBase } from '@planner/common-core';
 import { HttpError } from './http.error';
 
 type ValidationLocation =

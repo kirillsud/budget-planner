@@ -1,4 +1,4 @@
-import { ErrorBase } from '@planner/common/core';
+import { ErrorBase } from '@planner/common-core';
 
 export class HttpError extends Error implements ErrorBase {
   constructor(message: string, public type: string) {

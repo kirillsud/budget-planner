@@ -1,14 +1,15 @@
 module.exports = {
-  displayName: 'budget-domain',
+  displayName: 'budget-api',
   preset: '../../../jest.preset.ts',
   globals: {
     'ts-jest': {
       tsconfig: '<rootDir>/tsconfig.spec.json',
     },
   },
+  testEnvironment: 'node',
   transform: {
     '^.+\\.[tj]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../../coverage/libs/budget/domain',
+  coverageDirectory: '../../../coverage/libs/budget/api',
 };

@@ -1,11 +1,10 @@
 import * as express from 'express';
 import * as cors from 'cors';
-import { auth } from './app/middleware/auth';
+import * as authFeature from '@planner/auth-api';
+import * as budgetFeature from '@planner/budget-api';
 import { error } from './app/middleware/error';
-import authRouter from './app/routes/auth.routes';
-import budgetRouter from './app/routes/budget.routes';
 
-import { PORT, CLIENT_URL } from './app/utils/config';
+import { PORT, CLIENT_URL } from '@planner/common-api';
 
 const app = express();
 
@@ -18,13 +17,13 @@ app.use(
 
 app.use(express.json());
 
-app.get('/api/ping', async (req, res) => {
+app.get('/api/ping', async (_req, res) => {
   res.send('Server works!');
 });
 
-app.use(authRouter);
+app.use('/api/auth', authFeature.router);
 
-app.use(auth, budgetRouter);
+app.use('/api/budget', authFeature.guard, budgetFeature.router);
 
 app.use(error);
 

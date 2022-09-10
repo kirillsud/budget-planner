@@ -1,5 +1,5 @@
 import Alert from '@mui/material/Alert';
-import { ErrorBase } from '@planner/common/core';
+import { ErrorBase } from '@planner/common-core';
 import { useTranslation } from 'react-i18next';
 
 export interface ErrorAlertProps {

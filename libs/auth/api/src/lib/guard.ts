@@ -1,6 +1,6 @@
-import { Request } from 'express';
-import { decodeJwt } from '../utils/jwt';
-import { HttpAuthorizationError } from '../errors/http-authorization.error';
+import { RequestHandler } from 'express';
+import { HttpAuthorizationError } from '@planner/common-api';
+import { decodeJwt } from './jwt';
 
 export interface AuthToken {
   series: string;
@@ -9,11 +9,7 @@ export interface AuthToken {
   expire: number;
 }
 
-export interface AuthRequest extends Request {
-  auth: AuthToken;
-}
-
-export function auth(req: AuthRequest, _res, next) {
+export const guard: RequestHandler = (req, res, next) => {
   const token = req.headers.authorization;
 
   if (!token) {
@@ -23,7 +19,7 @@ export function auth(req: AuthRequest, _res, next) {
 
   try {
     const payload = decodeJwt<AuthToken>(token);
-    req.auth = payload;
+    res.locals['auth'] = payload;
   } catch (err) {
     next(new HttpAuthorizationError());
     return;

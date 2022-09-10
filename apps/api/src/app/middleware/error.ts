@@ -1,12 +1,12 @@
-import { UNKNOWN_ERROR } from '@planner/common/core';
+import { UNKNOWN_ERROR } from '@planner/common-core';
 import { isCelebrateError } from 'celebrate';
 import * as express from 'express';
 import { environment } from '../../environments/environment';
 import {
   fromCelebrateError,
   HttpValidationError,
-} from '../errors/http-validation.error';
-import { HttpError } from '../errors/http.error';
+  HttpError,
+} from '@planner/common-api';
 
 export function error(
   error: unknown,

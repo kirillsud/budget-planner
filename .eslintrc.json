@@ -13,12 +13,16 @@
             "allow": [],
             "depConstraints": [
               {
-                "sourceTag": "scope:auth",
-                "onlyDependOnLibsWithTags": ["scope:auth", "scope:common"]
+                "sourceTag": "feature:auth",
+                "onlyDependOnLibsWithTags": ["feature:auth", "feature:common"]
               },
               {
-                "sourceTag": "scope:budget",
-                "onlyDependOnLibsWithTags": ["scope:budget", "scope:auth", "scope:common"]
+                "sourceTag": "feature:budget",
+                "onlyDependOnLibsWithTags": [
+                  "feature:budget",
+                  "feature:auth",
+                  "feature:common"
+                ]
               },
               {
                 "sourceTag": "type:app",
@@ -26,23 +30,27 @@
               },
               {
                 "sourceTag": "type:feature",
-                "onlyDependOnLibsWithTags": ["type:domain", "type:utils"]
+                "onlyDependOnLibsWithTags": [
+                  "type:feature",
+                  "type:domain",
+                  "type:utils"
+                ]
               },
               {
                 "sourceTag": "type:domain",
-                "onlyDependOnLibsWithTags": ["type:utils"]
+                "onlyDependOnLibsWithTags": ["type:domain", "type:utils"]
               },
               {
                 "sourceTag": "type:utils",
                 "onlyDependOnLibsWithTags": []
               },
               {
-                "sourceTag": "type:web",
-                "onlyDependOnLibsWithTags": ["type:web"]
+                "sourceTag": "scope:web",
+                "onlyDependOnLibsWithTags": ["scope:web"]
               },
               {
-                "sourceTag": "type:api",
-                "onlyDependOnLibsWithTags": ["type:api"]
+                "sourceTag": "scope:api",
+                "onlyDependOnLibsWithTags": ["scope:api"]
               }
             ]
           }

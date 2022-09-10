@@ -1,12 +1,7 @@
 import * as Joi from 'joi';
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { BudgetRecord, TimestampInMsec } from '@planner/budget-domain';
-import { HttpAuthorizationError } from '../errors/http-authorization.error';
-import { HttpNotFoundError } from '../errors/http-not-found.error copy';
-import { fromJoiError } from '../errors/http-validation.error';
-import { AuthToken } from '../middleware/auth';
-import { API_URL } from './config';
-import { HttpError } from '../errors/http.error';
+import { API_URL, HttpNotFoundError, fromJoiError } from '@planner/common-api';
+import { AuthToken, LegacyApi as AuthLegacyApi } from '@planner/auth-api';
+import { BudgetRecord, TimestampInMsec } from '@planner/budget-core';
 
 type TimestampInSec = number & { type: 'timestamp-in-sec' };
 
@@ -29,11 +24,11 @@ interface ApiGoalResponse extends ApiRecord {
   date_to: TimestampInSec;
 }
 
-interface ApiIncomeRequest extends ApiRecord {
+interface ApiIncomeRequest extends MakeOptional<ApiRecord, 'id'> {
   date: string;
 }
 
-interface ApiGoalRequest extends ApiRecord {
+interface ApiGoalRequest extends MakeOptional<ApiRecord, 'id'> {
   date_from: string;
   date_to: string;
 }
@@ -45,55 +40,9 @@ interface ApiDayRecords {
 
 type ApiRecordsByDay = Record<number, ApiDayRecords>;
 
-export class LegacyApi {
-  constructor(private readonly url: string) {}
-
-  async login(
-    email: string,
-    password: string,
-    remember: boolean
-  ): Promise<AuthToken> {
-    const { data } = await axios.postForm<AuthToken | number>(
-      `${this.url}/auth.php`,
-      {
-        email,
-        password,
-        remember: remember ? 'on' : 'off',
-      }
-    );
-
-    if (typeof data === 'number') {
-      if (data === -3) {
-        throw new HttpError(400, 'Invalid email or password', 'auth.wrong-credentials');
-      } else {
-        throw new HttpError(500);
-      }
-    }
-
-    return data;
-  }
-
-  async refresh(auth: AuthToken): Promise<AuthToken> {
-    const { data } = await this.request<AuthToken | number>(auth, '/auth.php', {
-      method: 'post',
-      headers: {
-        Cookie: `auth_token=${auth.token}; auth_series=${auth.series}`,
-      },
-    });
-
-    return processLoginResponse(data);
-  }
-
-  async logout(auth: AuthToken): Promise<void> {
-    try {
-      await this.request<number>(auth, '/logout.php', { method: 'get' });
-    } catch (error: unknown | AxiosError) {
-      if (error instanceof AxiosError && error.response?.status === 401) {
-        return;
-      }
-    }
-
-    throw new HttpAuthorizationError();
+export class LegacyApi extends AuthLegacyApi {
+  constructor(url: string) {
+    super(url);
   }
 
   async getAll(auth: AuthToken): Promise<BudgetRecord[]> {
@@ -101,7 +50,7 @@ export class LegacyApi {
       method: 'get',
     });
 
-    const records: BudgetRecord[] = Object.values(dates).reduce((acc, day) => {
+    const records: BudgetRecord[] = Object.values(dates).reduce<BudgetRecord[]>((acc, day) => {
       if (day.incoming) {
         acc.push(
           ...day.incoming.map((income) =>
@@ -168,7 +117,7 @@ export class LegacyApi {
       return convertToBudgetRecord(data, record.type);
     }
 
-    processUpdateError(data, record);
+    throw processUpdateError(data, record);
   }
 
   async remove(
@@ -211,30 +160,6 @@ export class LegacyApi {
     }
 
     throw new Error(`Unknown error code ${data}`);
-  }
-
-  private async request<T>(
-    auth: AuthToken,
-    path: string,
-    config: AxiosRequestConfig,
-    form = false
-  ): Promise<AxiosResponse<T>> {
-    const url = `${this.url}${path}`;
-    const cookies = `PHPSESSID=${auth.session}; auth_series=${auth.series}; auth_token=${auth.token}`;
-    const options = {
-      ...config,
-      url,
-      headers: {
-        Cookie: cookies,
-        ...config?.headers,
-      },
-    };
-
-    if (form) {
-      return axios.postForm<T>(url, options.data, options);
-    }
-
-    return axios.request<T>(options);
   }
 }
 
@@ -307,59 +232,44 @@ function timestampToIsoDate(timestamp: TimestampInMsec): string {
 function processUpdateError(
   error: number,
   record: MakeOptional<BudgetRecord, 'id'>
-): void {
+): Error {
   switch (error) {
     case -1:
-      throw createValidationError('id', Joi.number().required());
+      return createValidationError('id', Joi.number().required());
 
     case -2:
-      throw createValidationError('title', Joi.string().required());
+      return createValidationError('title', Joi.string().required());
 
     case -3:
-      throw createValidationError('amount', Joi.number().required().min(0));
+      return createValidationError('amount', Joi.number().required().min(0));
 
     case -4:
-      throw createValidationError('date.from', Joi.date().required());
+      return createValidationError('date.from', Joi.date().required());
 
     case -5:
-      throw createValidationError('date.to', Joi.date().required());
+      return createValidationError('date.to', Joi.date().required());
 
     case -6:
-      throw new HttpNotFoundError();
+      return new HttpNotFoundError();
 
     case -7:
-      throw createValidationError('date.to', Joi.date().min(record.date.from));
+      return createValidationError('date.to', Joi.date().min(record.date.from));
 
     default:
-      throw new Error(`Unknown error code ${error}`);
+      return new Error(`Unknown error code ${error}`);
   }
 }
 
-function createValidationError(_field: string, schema: Joi.Schema): Error {
-  return fromJoiError(Joi.object({
-    'id': schema
-  }).validate({}).error, 'body');
-}
+function createValidationError(field: string, schema: Joi.Schema): Error {
+  const error = Joi.object({ [field]: schema })
+    .validate({})
+    .error;
 
-function processLoginResponse<T>(response: number | T): T {
-  if (typeof response === 'number') {
-    switch (response) {
-      case 0:
-        throw new HttpError(403, 'Already logged in', 'user.logged-in');
-      case -1:
-      case -2:
-      case -3:
-        throw new HttpError(400, 'Invalid email or password', 'auth.wrong-credentials');
-      case -5:
-        throw new HttpError(403, 'User is not activated', 'user.not-activated');
-      case -6:
-        throw new HttpError(403, 'User is blocked', 'user.blocked');
-      default:
-        throw new HttpAuthorizationError();
-    }
+  if (!error) {
+    throw new Error('Validation error is not created');
   }
 
-  return response;
+  return fromJoiError(error, 'body');
 }
 
 export const legacyApi = new LegacyApi(API_URL);

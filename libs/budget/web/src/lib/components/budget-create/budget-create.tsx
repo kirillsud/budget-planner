@@ -2,7 +2,7 @@ import { FormEvent, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { BudgetRecord, TimestampInMsec } from '@planner/budget-domain';
+import { BudgetRecord, TimestampInMsec } from '@planner/budget-core';
 import { ErrorAlert, getFormErrors } from '@planner/common-web';
 import { budgetThunks, selectBudgetCreating } from '../../store';
 import Container from '@mui/material/Container';

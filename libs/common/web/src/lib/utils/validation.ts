@@ -1,4 +1,4 @@
-import { ErrorBase } from '@planner/common/core';
+import { ErrorBase } from '@planner/common-core';
 
 export type SourceType =
   | 'params'

@@ -8,7 +8,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { BudgetRecord, TimestampInMsec } from '@planner/budget-domain';
+import { BudgetRecord, TimestampInMsec } from '@planner/budget-core';
 import { Preloader, ErrorAlert, getFormErrors } from '@planner/common-web';
 import { selectBudgetById, budgetThunks } from '../../store';
 

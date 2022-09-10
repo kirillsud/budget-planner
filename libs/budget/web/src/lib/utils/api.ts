@@ -1,5 +1,5 @@
 import { AuthToken } from '@planner/auth-web';
-import { BudgetRecord } from '@planner/budget-domain';
+import { BudgetRecord } from '@planner/budget-core';
 import { config, processResponse } from '@planner/common-web';
 
 const { apiUrl } = config();

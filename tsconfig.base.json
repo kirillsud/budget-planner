@@ -15,11 +15,15 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@planner/auth-api": ["libs/auth/api/src/index.ts"],
+      "@planner/auth-core": ["libs/auth/core/src/index.ts"],
       "@planner/auth-web": ["libs/auth/web/src/index.ts"],
-      "@planner/budget-domain": ["libs/budget/domain/src/index.ts"],
+      "@planner/budget-api": ["libs/budget/api/src/index.ts"],
+      "@planner/budget-core": ["libs/budget/core/src/index.ts"],
       "@planner/budget-web": ["libs/budget/web/src/index.ts"],
-      "@planner/common-web": ["libs/common/web/src/index.ts"],
-      "@planner/common/core": ["libs/common/core/src/index.ts"]
+      "@planner/common-api": ["libs/common/api/src/index.ts"],
+      "@planner/common-core": ["libs/common/core/src/index.ts"],
+      "@planner/common-web": ["libs/common/web/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
