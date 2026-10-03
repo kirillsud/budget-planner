@@ -40,3 +40,9 @@ After a schema change: add a migration, apply it, regenerate `src/data/database.
 - `legacy/v3-nx` - the unfinished Nx + React + Express rewrite (2022) that used to live in the repository root.
 - v1 (PHP + jQuery Mobile, the version that ran in production) and v2 (AngularJS + PHP REST, unfinished) live in
   private Bitbucket repositories and are not part of this repo.
+
+## Demo account
+
+The login page has an "Open the demo" button that signs in as `demo@example.com` / `budget-demo` (public on purpose).
+`private.reset_demo()` restores its settings, password and 16 sample records with dates relative to today; pg_cron runs it
+every night at 03:00 UTC (job `reset-demo-account`). Run `select private.reset_demo();` in the SQL editor to reset now.

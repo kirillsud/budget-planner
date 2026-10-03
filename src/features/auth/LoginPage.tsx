@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { DEMO_EMAIL, DEMO_PASSWORD } from '../../data/demo.ts'
 import { supabase } from '../../data/supabase.ts'
 import { useI18n } from '../../i18n.ts'
 import { Button, TextField } from '../../components/ui.tsx'
@@ -8,7 +9,7 @@ const googleEnabled = import.meta.env.VITE_ENABLE_GOOGLE === 'true'
 export function LoginPage() {
   const { t } = useI18n()
   const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle')
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'demo'>('idle')
   const [error, setError] = useState<string | null>(null)
 
   const redirectTo = window.location.origin
@@ -23,6 +24,16 @@ export function LoginPage() {
       setStatus('idle')
     } else {
       setStatus('sent')
+    }
+  }
+
+  async function openDemo() {
+    setError(null)
+    setStatus('demo')
+    const { error } = await supabase.auth.signInWithPassword({ email: DEMO_EMAIL, password: DEMO_PASSWORD })
+    if (error) {
+      setError(t('login.error', { message: error.message }))
+      setStatus('idle')
     }
   }
 
@@ -65,6 +76,14 @@ export function LoginPage() {
           )}
         </form>
       )}
+
+      <div className="flex flex-col gap-2 rounded-2xl border border-line bg-card p-4">
+        <span className="text-[15px] font-medium">{t('login.demoTitle')}</span>
+        <span className="text-sm leading-relaxed text-muted">{t('login.demoHint')}</span>
+        <Button variant="soft" onClick={openDemo} disabled={status === 'demo'}>
+          {t('login.demo')}
+        </Button>
+      </div>
 
       {error && (
         <p role="alert" className="rounded-2xl bg-crit-soft p-4 text-[15px] text-crit-ink">
