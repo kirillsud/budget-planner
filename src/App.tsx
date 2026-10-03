@@ -51,7 +51,8 @@ export function App() {
     // would open whatever URL was left behind, e.g. /settings after "Sign out" there.
     // Done during render so the URL is reset before the router mounts and reads it.
     wasSignedOut.current = false
-    if (window.location.pathname !== '/') window.history.replaceState(null, '', '/')
+    // Go through the router's history object: it caches the location, a raw history.replaceState would bypass it.
+    if (router.history.location.pathname !== '/') router.history.replace('/')
   }
   const [locale, setLocale] = useState<Locale>(detectLocale)
   const changeLocale = (next: Locale) => {
