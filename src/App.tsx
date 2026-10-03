@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { RouterProvider } from '@tanstack/react-router'
 import { useSettings } from './data/queries.ts'
 import { useSession } from './data/session.ts'
@@ -11,6 +11,9 @@ import { Spinner } from './components/ui.tsx'
 
 function I18nProvider({ locale, children }: { locale: Locale; children: ReactNode }) {
   const value = useMemo(() => ({ locale, t: createTranslator(locale) }), [locale])
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
 }
 

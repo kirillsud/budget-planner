@@ -218,7 +218,24 @@ export function detectLocale(): Locale {
   } catch {
     // storage unavailable (private mode): fall back to the browser language
   }
-  return typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('en') ? 'en' : 'ru'
+  return browserLocale()
+}
+
+/**
+ * Picks the first supported language from the browser's preference list
+ * (e.g. ["nl-NL", "ru", "en"] -> "ru"). Unsupported-only lists fall back to English.
+ */
+export function browserLocale(preferred: readonly string[] = browserLanguages()): Locale {
+  for (const tag of preferred) {
+    const lang = tag.toLowerCase().split('-')[0]
+    if (lang === 'ru' || lang === 'en') return lang
+  }
+  return 'en'
+}
+
+function browserLanguages(): readonly string[] {
+  if (typeof navigator === 'undefined') return []
+  return navigator.languages?.length ? navigator.languages : [navigator.language]
 }
 
 export function rememberLocale(locale: Locale): void {
