@@ -10,7 +10,13 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
-      workbox: { clientsClaim: true, skipWaiting: true, cleanupOutdatedCaches: true },
+      workbox: {
+        clientsClaim: true,
+        skipWaiting: true,
+        cleanupOutdatedCaches: true,
+        // /help/* are static pages (privacy, terms), not app routes
+        navigateFallbackDenylist: [/^\/help\//],
+      },
       includeAssets: ['icon.svg'],
       manifest: {
         name: 'Планировщик бюджета',

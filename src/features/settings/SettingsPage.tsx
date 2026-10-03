@@ -171,6 +171,15 @@ function SettingsForm({ settings }: { settings: BudgetSettings }) {
       <Button variant="danger" onClick={() => supabase.auth.signOut()}>
         {t('settings.signOut')}
       </Button>
+
+      <p className="m-0 flex justify-center gap-4 text-[13px]">
+        <a href={`/help/privacy?lang=${locale}`} className="text-muted">
+          {t('settings.privacy')}
+        </a>
+        <a href={`/help/terms?lang=${locale}`} className="text-muted">
+          {t('settings.terms')}
+        </a>
+      </p>
     </main>
   )
 }

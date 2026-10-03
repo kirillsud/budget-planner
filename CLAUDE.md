@@ -31,4 +31,6 @@ if the board is silent, ask and record the question in doc 06.
   app (restricted production) and enters app id + private key in Settings. Keys live in Vault, only the `bank` edge
   function (service role) reads them; never return them to the browser. `settings.balance_source` = `manual|bank`;
   refresh on app open (throttled 10 min) + pg_cron `bank-refresh` 4×/day (PSD2 limit). Hidden for the demo account.
+- `/help/privacy` and `/help/terms` are static bilingual pages in `public/help` (needed by Enable Banking app
+  registration), outside the SPA and the i18n dictionary; keep them in step with what the app stores.
 - Not in v1 yet: automatic balance change on "paid", data migration from the old MySQL.
