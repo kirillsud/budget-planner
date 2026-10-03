@@ -1,13 +1,18 @@
 import { useState, type FormEvent } from 'react'
 import { DEMO_EMAIL, DEMO_PASSWORD } from '../../data/demo.ts'
 import { supabase } from '../../data/supabase.ts'
-import { useI18n } from '../../i18n.ts'
+import { useI18n, type Locale } from '../../i18n.ts'
 import { Button, TextField } from '../../components/ui.tsx'
 
 const googleEnabled = import.meta.env.VITE_ENABLE_GOOGLE === 'true'
 
-export function LoginPage() {
-  const { t } = useI18n()
+const languages: { value: Locale; label: string }[] = [
+  { value: 'ru', label: 'Русский' },
+  { value: 'en', label: 'English' },
+]
+
+export function LoginPage({ onLocaleChange }: { onLocaleChange: (locale: Locale) => void }) {
+  const { t, locale } = useI18n()
   const [email, setEmail] = useState('')
   const [mode, setMode] = useState<'link' | 'password'>('link')
   const [password, setPassword] = useState('')
@@ -58,6 +63,23 @@ export function LoginPage() {
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-8 px-4 py-10">
+      <div role="radiogroup" aria-label={t('settings.language')} className="flex gap-1 self-end rounded-full bg-line-soft p-1">
+        {languages.map((l) => (
+          <button
+            key={l.value}
+            type="button"
+            role="radio"
+            aria-checked={locale === l.value}
+            lang={l.value}
+            onClick={() => onLocaleChange(l.value)}
+            className={`min-h-9 rounded-full px-3 text-sm transition ${
+              locale === l.value ? 'bg-card font-semibold text-ink shadow-sm' : 'font-medium text-muted'
+            }`}
+          >
+            {l.label}
+          </button>
+        ))}
+      </div>
       <div className="flex flex-col gap-3">
         <img src="/icon.svg" alt="" width={56} height={56} className="rounded-2xl" />
         <h1 className="text-3xl font-bold tracking-tight">{t('login.title')}</h1>

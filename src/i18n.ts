@@ -208,8 +208,25 @@ export function createTranslator(locale: Locale): Translate {
   }
 }
 
+const LOCALE_KEY = 'budget-planner.locale'
+
+/** Language before sign-in: the visitor's last choice, else the browser language. */
 export function detectLocale(): Locale {
+  try {
+    const saved = localStorage.getItem(LOCALE_KEY)
+    if (saved === 'ru' || saved === 'en') return saved
+  } catch {
+    // storage unavailable (private mode): fall back to the browser language
+  }
   return typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('en') ? 'en' : 'ru'
+}
+
+export function rememberLocale(locale: Locale): void {
+  try {
+    localStorage.setItem(LOCALE_KEY, locale)
+  } catch {
+    // not critical
+  }
 }
 
 export interface I18n {

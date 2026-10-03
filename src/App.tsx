@@ -1,11 +1,11 @@
-import { useMemo, type ReactNode } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { RouterProvider } from '@tanstack/react-router'
 import { useSettings } from './data/queries.ts'
 import { useSession } from './data/session.ts'
 import { supabase, supabaseConfigured } from './data/supabase.ts'
 import { isDemoEmail } from './data/demo.ts'
 import { LoginPage } from './features/auth/LoginPage.tsx'
-import { I18nContext, createTranslator, detectLocale, useI18n, type Locale } from './i18n.ts'
+import { I18nContext, createTranslator, detectLocale, rememberLocale, useI18n, type Locale } from './i18n.ts'
 import { router } from './router.tsx'
 import { Spinner } from './components/ui.tsx'
 
@@ -41,7 +41,11 @@ function SignedIn({ demo }: { demo: boolean }) {
 
 export function App() {
   const session = useSession()
-  const locale = detectLocale()
+  const [locale, setLocale] = useState<Locale>(detectLocale)
+  const changeLocale = (next: Locale) => {
+    rememberLocale(next)
+    setLocale(next)
+  }
 
   if (!supabaseConfigured) {
     return (
@@ -60,7 +64,7 @@ export function App() {
   if (session === null) {
     return (
       <I18nProvider locale={locale}>
-        <LoginPage />
+        <LoginPage onLocaleChange={changeLocale} />
       </I18nProvider>
     )
   }
