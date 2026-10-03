@@ -9,7 +9,20 @@ const googleEnabled = import.meta.env.VITE_ENABLE_GOOGLE === 'true'
 export function LoginPage() {
   const { t } = useI18n()
   const [email, setEmail] = useState('')
+  const [mode, setMode] = useState<'link' | 'password'>('link')
+  const [password, setPassword] = useState('')
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'demo'>('idle')
+
+  async function signInWithPassword(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setStatus('sending')
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+    if (error) {
+      setError(t('login.error', { message: error.message }))
+      setStatus('idle')
+    }
+  }
   const [error, setError] = useState<string | null>(null)
 
   const redirectTo = window.location.origin
@@ -56,7 +69,7 @@ export function LoginPage() {
           {t('login.sent', { email })}
         </p>
       ) : (
-        <form onSubmit={sendLink} className="flex flex-col gap-3">
+        <form onSubmit={mode === 'link' ? sendLink : signInWithPassword} className="flex flex-col gap-3">
           <TextField
             label={t('login.email')}
             type="email"
@@ -65,9 +78,26 @@ export function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <Button type="submit" variant="primary" disabled={status === 'sending' || !email}>
-            {t('login.send')}
+          {mode === 'password' && (
+            <TextField
+              label={t('login.password')}
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          )}
+          <Button type="submit" variant="primary" disabled={status === 'sending' || !email || (mode === 'password' && !password)}>
+            {mode === 'link' ? t('login.send') : t('login.signIn')}
           </Button>
+          <button
+            type="button"
+            onClick={() => setMode(mode === 'link' ? 'password' : 'link')}
+            className="min-h-11 text-sm font-medium text-accent"
+          >
+            {mode === 'link' ? t('login.usePassword') : t('login.useLink')}
+          </button>
           {googleEnabled && (
             <>
               <span className="text-center text-sm text-muted">{t('login.or')}</span>
