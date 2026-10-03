@@ -46,3 +46,15 @@ After a schema change: add a migration, apply it, regenerate `src/data/database.
 The login page has an "Open the demo" button that signs in as `demo@example.com` / `budget-demo` (public on purpose).
 `private.reset_demo()` restores its settings, password and 16 sample records with dates relative to today; pg_cron runs it
 every night at 03:00 UTC (job `reset-demo-account`). Run `select private.reset_demo();` in the SQL editor to reset now.
+
+## Bank balance (Enable Banking)
+
+Optional, per user, read-only. Every user brings their own free Enable Banking application:
+
+1. Sign up at https://enablebanking.com, Control Panel → Applications → new application, environment **Production**
+   (restricted mode: only your own accounts), redirect URL `https://<app host>/bank/callback`.
+2. Generate the key in the browser, download the `.pem`, link your own account in the panel as Enable Banking asks.
+3. In the planner: Settings → "Balance from your bank" → paste the application ID and the `.pem`, then pick the bank.
+
+Server side: `supabase/functions/bank` (deploy with `verify_jwt = false`; it checks the user JWT itself and the cron
+secret for `cron-refresh`), tables `bank_credentials` / `bank_connections`, private key in Supabase Vault.

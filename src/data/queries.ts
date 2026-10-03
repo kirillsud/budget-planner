@@ -28,6 +28,7 @@ function toSettings(row: SettingsRow): BudgetSettings {
   return {
     balance: row.balance,
     balanceUpdatedAt: row.balance_updated_at,
+    balanceSource: row.balance_source === 'bank' ? 'bank' : 'manual',
     dailyExpenses: row.daily_expenses,
     warningBalance: row.warning_balance,
     criticalBalance: row.critical_balance,
@@ -62,7 +63,7 @@ export function useSettings() {
 export function useUpdateSettings() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (patch: Partial<Omit<BudgetSettings, 'balanceUpdatedAt'>>) => {
+    mutationFn: async (patch: Partial<Omit<BudgetSettings, 'balanceUpdatedAt' | 'balanceSource'>>) => {
       const userId = await currentUserId()
       const row: Database['public']['Tables']['settings']['Update'] = {}
       if (patch.balance !== undefined) row.balance = patch.balance

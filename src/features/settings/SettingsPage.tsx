@@ -8,6 +8,8 @@ import { useSession } from '../../data/session.ts'
 import { isDemoEmail } from '../../data/demo.ts'
 import { useI18n } from '../../i18n.ts'
 import { Button, Card, Spinner, TextField, icons } from '../../components/ui.tsx'
+import { useBankStatus } from '../../data/bank.ts'
+import { BankCard } from './BankCard.tsx'
 
 /** Currencies offered in settings; RUB is the default for new accounts (see the migration). */
 const currencies = ['RUB', 'EUR', 'USD', 'GBP', 'CHF', 'PLN', 'CZK', 'SEK', 'NOK', 'DKK', 'TRY', 'GEL', 'AMD', 'KZT', 'UAH', 'RSD', 'AED', 'THB', 'VND'] as const
@@ -77,8 +79,23 @@ function SettingsForm({ settings }: { settings: BudgetSettings }) {
     setSavedField('scale')
   }
 
+  const session = useSession()
+  const demo = !session || isDemoEmail(session.user.email)
+  const fromBank = settings.balanceSource === 'bank'
+  const bank = useBankStatus(fromBank)
+  const bankName = bank.data?.connection?.aspspName ?? 'bank'
+
+  // A bank-synced balance changes underneath the form (refresh, disconnect): keep the field in step,
+  // otherwise a blur after disconnecting would write the stale number back.
+  const [shownBalance, setShownBalance] = useState(settings.balance)
+  if (settings.balance !== shownBalance) {
+    setShownBalance(settings.balance)
+    setValues((v) => ({ ...v, balance: centsToInput(settings.balance, locale) }))
+  }
+
   const field = (name: MoneyField, label: string, hint?: string) => (
     <TextField
+      readOnly={name === 'balance' && fromBank}
       label={label}
       hint={savedField === name ? t('settings.saved') : hint}
       error={errors[name]}
@@ -88,7 +105,7 @@ function SettingsForm({ settings }: { settings: BudgetSettings }) {
         setSavedField(null)
         setValues((v) => ({ ...v, [name]: e.target.value }))
       }}
-      onBlur={() => saveMoney(name)}
+      onBlur={() => (name === 'balance' && fromBank ? undefined : saveMoney(name))}
     />
   )
 
@@ -102,7 +119,7 @@ function SettingsForm({ settings }: { settings: BudgetSettings }) {
       </header>
 
       <Card className="flex flex-col gap-4 p-4">
-        {field('balance', t('settings.balance'), t('settings.balanceHint'))}
+        {field('balance', t('settings.balance'), fromBank ? t('settings.balanceFromBank', { bank: bankName }) : t('settings.balanceHint'))}
         {field('dailyExpenses', t('settings.daily'), t('settings.dailyHint'))}
       </Card>
 
@@ -140,6 +157,8 @@ function SettingsForm({ settings }: { settings: BudgetSettings }) {
           onChange={(value) => update.mutate({ locale: value === 'en' ? 'en' : 'ru' })}
         />
       </Card>
+
+      {!demo && <BankCard />}
 
       <PasswordCard />
 

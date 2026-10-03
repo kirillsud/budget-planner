@@ -4,6 +4,7 @@ import { dayOfMonth, monthKey, todayIso, type IsoDate } from '../../domain/dates
 import { dailyBalances, forecast, lowestUntilNextIncome, type ForecastPoint, type Level } from '../../domain/forecast.ts'
 import { isSingleDay, signedAmount, type BudgetRecord, type BudgetSettings } from '../../domain/records.ts'
 import { useRecords, useSettings } from '../../data/queries.ts'
+import { useBankAutoRefresh, useBankStatus } from '../../data/bank.ts'
 import { useI18n } from '../../i18n.ts'
 import { money, monthTitle, shortDate, timeAgo, weekdayShort } from '../../lib/format.ts'
 import { Button, Card, Spinner, icons } from '../../components/ui.tsx'
@@ -41,6 +42,12 @@ function Home({ settings, records }: { settings: BudgetSettings; records: Budget
   const [sheet, setSheet] = useState<SheetState | null>(null)
   const today = todayIso()
   const cur = settings.currency
+  const fromBank = settings.balanceSource === 'bank'
+  useBankAutoRefresh(fromBank)
+  const bank = useBankStatus()
+  const conn = bank.data?.connection ?? null
+  // the server switches the balance back to manual when consent expires: say so instead of "reconcile"
+  const bankExpired = conn?.status === 'expired'
 
   const { f, series, lowest } = useMemo(() => {
     const input = { today, settings, records }
@@ -78,7 +85,11 @@ function Home({ settings, records }: { settings: BudgetSettings; records: Budget
           <span className="text-[13px] text-muted">{t('home.balanceNow')}</span>
           <span className="text-[26px] font-bold tracking-tight">{money(settings.balance, cur, locale)}</span>
           <Link to="/settings" className="text-[13px] font-medium text-accent no-underline">
-            {t('home.updated', { ago: timeAgo(settings.balanceUpdatedAt, t) })}
+            {bankExpired
+              ? t('home.bankExpired')
+              : fromBank && conn
+                ? t('home.updatedBank', { bank: conn.aspspName, ago: timeAgo(settings.balanceUpdatedAt, t) })
+                : t('home.updated', { ago: timeAgo(settings.balanceUpdatedAt, t) })}
           </Link>
         </div>
         <Link

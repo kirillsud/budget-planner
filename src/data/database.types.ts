@@ -15,6 +15,96 @@ export type Database = {
   }
   public: {
     Tables: {
+      bank_connections: {
+        Row: {
+          account_iban_tail: string | null
+          account_name: string | null
+          account_uid: string | null
+          accounts: Json
+          aspsp_country: string
+          aspsp_name: string
+          auth_state: string | null
+          created_at: string
+          currency: string | null
+          id: number
+          last_balance: number | null
+          last_balance_at: string | null
+          last_error: string | null
+          required_psu_headers: string[]
+          session_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          valid_until: string | null
+        }
+        Insert: {
+          account_iban_tail?: string | null
+          account_name?: string | null
+          account_uid?: string | null
+          accounts?: Json
+          aspsp_country: string
+          aspsp_name: string
+          auth_state?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: never
+          last_balance?: number | null
+          last_balance_at?: string | null
+          last_error?: string | null
+          required_psu_headers?: string[]
+          session_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          valid_until?: string | null
+        }
+        Update: {
+          account_iban_tail?: string | null
+          account_name?: string | null
+          account_uid?: string | null
+          accounts?: Json
+          aspsp_country?: string
+          aspsp_name?: string
+          auth_state?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: never
+          last_balance?: number | null
+          last_balance_at?: string | null
+          last_error?: string | null
+          required_psu_headers?: string[]
+          session_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
+      bank_credentials: {
+        Row: {
+          app_id: string | null
+          key_secret_id: string | null
+          provider: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_id?: string | null
+          key_secret_id?: string | null
+          provider?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_id?: string | null
+          key_secret_id?: string | null
+          provider?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       budget_records: {
         Row: {
           amount: number
@@ -116,6 +206,7 @@ export type Database = {
       settings: {
         Row: {
           balance: number
+          balance_source: string
           balance_updated_at: string
           critical_balance: number
           currency: string
@@ -128,6 +219,7 @@ export type Database = {
         }
         Insert: {
           balance?: number
+          balance_source?: string
           balance_updated_at?: string
           critical_balance?: number
           currency?: string
@@ -140,6 +232,7 @@ export type Database = {
         }
         Update: {
           balance?: number
+          balance_source?: string
           balance_updated_at?: string
           critical_balance?: number
           currency?: string
@@ -157,6 +250,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bank_clear_credentials: { Args: { p_user: string }; Returns: undefined }
+      bank_cron_secret: { Args: never; Returns: string }
+      bank_get_credentials: {
+        Args: { p_user: string }
+        Returns: {
+          app_id: string
+          private_key: string
+        }[]
+      }
+      bank_set_credentials: {
+        Args: { p_app_id: string; p_private_key: string; p_user: string }
+        Returns: undefined
+      }
       repeat_monthly: { Args: { p_record_id: number }; Returns: number }
       stop_series_from: { Args: { p_record_id: number }; Returns: undefined }
       update_series_from: {

@@ -24,6 +24,8 @@ export type NewBudgetRecord = Omit<BudgetRecord, 'id'> & { id?: number }
 export interface BudgetSettings {
   balance: Cents
   balanceUpdatedAt: string
+  /** 'bank' when the balance is synced from a connected bank account (optional in tests). */
+  balanceSource?: 'manual' | 'bank'
   dailyExpenses: Cents
   warningBalance: Cents
   criticalBalance: Cents

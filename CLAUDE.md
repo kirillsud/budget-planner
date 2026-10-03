@@ -27,4 +27,8 @@ if the board is silent, ask and record the question in doc 06.
 - Monthly repeats: `budget_series` holds the rule, occurrences are normal `budget_records` rows (`series_id`,
   `series_index`) generated ~13 months ahead by `private.extend_series()` (pg_cron daily) and by
   `public.repeat_monthly()`. Edit later months with `public.update_series_from()`, stop with `public.stop_series_from()`.
+- Bank balance: Enable Banking (AIS, read-only), "bring your own key" — each user registers their own Enable Banking
+  app (restricted production) and enters app id + private key in Settings. Keys live in Vault, only the `bank` edge
+  function (service role) reads them; never return them to the browser. `settings.balance_source` = `manual|bank`;
+  refresh on app open (throttled 10 min) + pg_cron `bank-refresh` 4×/day (PSD2 limit). Hidden for the demo account.
 - Not in v1 yet: automatic balance change on "paid", data migration from the old MySQL.
