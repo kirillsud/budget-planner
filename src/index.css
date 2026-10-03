@@ -1,0 +1,89 @@
+@import 'tailwindcss';
+
+:root {
+  --paper: #f5f6f2;
+  --card: #ffffff;
+  --ink: #16201b;
+  --muted: #5b655f;
+  --line: #e2e5df;
+  --line-soft: #eef0eb;
+  --accent: #0e6b5a;
+  --accent-ink: #0a5246;
+  --accent-soft: #e3f1ec;
+  --warn: #a35200;
+  --warn-ink: #6b3600;
+  --warn-soft: #fff1e0;
+  --warn-row: #fff8ef;
+  --crit: #b3261e;
+  --crit-ink: #7a1a14;
+  --crit-soft: #fdecea;
+  --scrim: rgb(22 32 27 / 0.45);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0f1512;
+    --card: #18201c;
+    --ink: #e8ece9;
+    --muted: #a3ada7;
+    --line: #2b3530;
+    --line-soft: #222b26;
+    --accent: #4cc3a6;
+    --accent-ink: #8fe0cb;
+    --accent-soft: #163a31;
+    --warn: #f0a050;
+    --warn-ink: #ffd2a3;
+    --warn-soft: #3a2712;
+    --warn-row: #2a2016;
+    --crit: #ff8a80;
+    --crit-ink: #ffc7c1;
+    --crit-soft: #3d1a17;
+    --scrim: rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+}
+
+@theme {
+  --font-sans: 'Onest', ui-sans-serif, system-ui, sans-serif;
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-warn: var(--warn);
+  --color-warn-ink: var(--warn-ink);
+  --color-warn-soft: var(--warn-soft);
+  --color-warn-row: var(--warn-row);
+  --color-crit: var(--crit);
+  --color-crit-ink: var(--crit-ink);
+  --color-crit-soft: var(--crit-soft);
+}
+
+html,
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+dialog::backdrop {
+  background: var(--scrim);
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
