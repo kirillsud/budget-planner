@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { RouterProvider } from '@tanstack/react-router'
 import { useSettings } from './data/queries.ts'
 import { useSession } from './data/session.ts'
@@ -44,6 +44,15 @@ function SignedIn({ demo }: { demo: boolean }) {
 
 export function App() {
   const session = useSession()
+  const wasSignedOut = useRef(false)
+  if (session === null) wasSignedOut.current = true
+  if (session && wasSignedOut.current) {
+    // Signing in from the login screen always starts on the home screen. Without this the router
+    // would open whatever URL was left behind, e.g. /settings after "Sign out" there.
+    // Done during render so the URL is reset before the router mounts and reads it.
+    wasSignedOut.current = false
+    if (window.location.pathname !== '/') window.history.replaceState(null, '', '/')
+  }
   const [locale, setLocale] = useState<Locale>(detectLocale)
   const changeLocale = (next: Locale) => {
     rememberLocale(next)
