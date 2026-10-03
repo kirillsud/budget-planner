@@ -129,6 +129,12 @@ export function LoginPage({ onLocaleChange }: { onLocaleChange: (locale: Locale)
         </form>
       )}
 
+      {error && (
+        <p role="alert" className="rounded-2xl bg-crit-soft p-4 text-[15px] text-crit-ink">
+          {error}
+        </p>
+      )}
+
       <div className="flex flex-col gap-2 rounded-2xl border border-line bg-card p-4">
         <span className="text-[15px] font-medium">{t('login.demoTitle')}</span>
         <span className="text-sm leading-relaxed text-muted">{t('login.demoHint')}</span>
@@ -136,12 +142,6 @@ export function LoginPage({ onLocaleChange }: { onLocaleChange: (locale: Locale)
           {t('login.demo')}
         </Button>
       </div>
-
-      {error && (
-        <p role="alert" className="rounded-2xl bg-crit-soft p-4 text-[15px] text-crit-ink">
-          {error}
-        </p>
-      )}
     </main>
   )
 }
