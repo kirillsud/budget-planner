@@ -21,4 +21,5 @@ if the board is silent, ask and record the question in doc 06.
 - Overdue = not completed and `date_to < today` (for both types; replaces the old "income today is overdue" rule).
 - Rows show the balance after the day ("остаток"); the hero card shows the lowest end-of-day balance until the
   next income and the headroom above the critical level. The legacy start-of-day totals stay in `forecast()`.
+- Currency is per account (`settings.currency`, ISO 4217), RUB by default; changeable in settings.
 - Not in v1 yet: recurring records, automatic balance change on "paid", data migration from the old MySQL.

@@ -7,7 +7,24 @@ import { supabase } from '../../data/supabase.ts'
 import { useI18n } from '../../i18n.ts'
 import { Button, Card, Spinner, TextField, icons } from '../../components/ui.tsx'
 
-const currencies = ['EUR', 'USD', 'GBP', 'RUB'] as const
+/** Currencies offered in settings; RUB is the default for new accounts (see the migration). */
+const currencies = ['RUB', 'EUR', 'USD', 'GBP', 'CHF', 'PLN', 'CZK', 'SEK', 'NOK', 'DKK', 'TRY', 'GEL', 'AMD', 'KZT', 'UAH', 'RSD', 'AED', 'THB', 'VND'] as const
+
+function currencyLabel(code: string, locale: string): string {
+  try {
+    const name = new Intl.DisplayNames([locale === 'en' ? 'en' : 'ru'], { type: 'currency' }).of(code)
+    return name ? `${code} · ${name}` : code
+  } catch {
+    return code
+  }
+}
+
+/** The list plus the account's current currency if it is not in the list (e.g. set via SQL). */
+function currencyOptions(current: string, locale: string) {
+  const codes: string[] = [...currencies]
+  if (!codes.includes(current)) codes.unshift(current)
+  return codes.map((c) => ({ value: c, label: currencyLabel(c, locale) }))
+}
 
 export function SettingsPage() {
   const { t } = useI18n()
@@ -108,7 +125,7 @@ function SettingsForm({ settings }: { settings: BudgetSettings }) {
         <SelectField
           label={t('settings.currency')}
           value={settings.currency}
-          options={currencies.map((c) => ({ value: c, label: c }))}
+          options={currencyOptions(settings.currency, locale)}
           onChange={(currency) => update.mutate({ currency })}
         />
         <SelectField
