@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Link } from '@tanstack/react-router'
 import { centsToInput, parseAmount } from '../../domain/money.ts'
 import type { BudgetSettings } from '../../domain/records.ts'
 import { useSettings, useUpdateSettings } from '../../data/queries.ts'
 import { supabase } from '../../data/supabase.ts'
+import { useSession } from '../../data/session.ts'
+import { isDemoEmail } from '../../data/demo.ts'
 import { useI18n } from '../../i18n.ts'
 import { Button, Card, Spinner, TextField, icons } from '../../components/ui.tsx'
 
@@ -139,6 +141,8 @@ function SettingsForm({ settings }: { settings: BudgetSettings }) {
         />
       </Card>
 
+      <PasswordCard />
+
       {update.error && (
         <p role="alert" className="rounded-2xl bg-crit-soft p-3 text-sm text-crit-ink">
           {t('common.error', { message: update.error.message })}
@@ -149,6 +153,57 @@ function SettingsForm({ settings }: { settings: BudgetSettings }) {
         {t('settings.signOut')}
       </Button>
     </main>
+  )
+}
+
+/** Lets a user who signed in with an email link set a password, so sign-in does not depend on email delivery. */
+function PasswordCard() {
+  const { t } = useI18n()
+  const session = useSession()
+  const [password, setPassword] = useState('')
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [error, setError] = useState<string | null>(null)
+
+  if (!session || isDemoEmail(session.user.email)) return null
+
+  async function save(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    if (password.length < 8) {
+      setError(t('settings.passwordShort'))
+      return
+    }
+    setStatus('saving')
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) {
+      setError(t('common.error', { message: error.message }))
+      setStatus('idle')
+    } else {
+      setPassword('')
+      setStatus('saved')
+    }
+  }
+
+  return (
+    <Card className="p-4">
+      <form onSubmit={save} className="flex flex-col gap-3">
+        <TextField
+          label={t('settings.password')}
+          hint={status === 'saved' ? t('settings.passwordSaved') : t('settings.passwordHint')}
+          error={error ?? undefined}
+          type="password"
+          autoComplete="new-password"
+          value={password}
+          onChange={(e) => {
+            setStatus('idle')
+            setPassword(e.target.value)
+          }}
+        />
+        <Button type="submit" disabled={status === 'saving' || password === ''}>
+          {t('settings.passwordSave')}
+        </Button>
+      </form>
+    </Card>
   )
 }
 
