@@ -33,4 +33,8 @@ if the board is silent, ask and record the question in doc 06.
   refresh on app open (throttled 10 min) + pg_cron `bank-refresh` 4×/day (PSD2 limit). Hidden for the demo account.
 - `/help/privacy` and `/help/terms` are static bilingual pages in `public/help` (needed by Enable Banking app
   registration), outside the SPA and the i18n dictionary; keep them in step with what the app stores.
+- Forecast vs reality: `balance_snapshots` (written only by a trigger on `settings` when the balance is set, at most
+  one unchanged row per ~day) + `src/domain/reality.ts`. Real daily spending = (start balance + completed incomes −
+  completed expenses − end balance) / days over the last ≤30 days (≥7 to show, ≥14 and no undecided past records to
+  suggest a new daily figure). Records count by `date_from` in (start day, end day]. Hidden for the demo account.
 - Not in v1 yet: automatic balance change on "paid", data migration from the old MySQL.

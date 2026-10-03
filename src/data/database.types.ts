@@ -15,6 +15,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      balance_snapshots: {
+        Row: {
+          balance: number
+          id: number
+          observed_at: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          balance: number
+          id?: never
+          observed_at?: string
+          source: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          id?: never
+          observed_at?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bank_connections: {
         Row: {
           account_iban_tail: string | null

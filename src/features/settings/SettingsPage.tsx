@@ -10,6 +10,7 @@ import { useI18n } from '../../i18n.ts'
 import { Button, Card, Spinner, TextField, icons } from '../../components/ui.tsx'
 import { useBankStatus } from '../../data/bank.ts'
 import { BankCard } from './BankCard.tsx'
+import { RealityCard } from './RealityCard.tsx'
 
 /** Currencies offered in settings; RUB is the default for new accounts (see the migration). */
 const currencies = ['RUB', 'EUR', 'USD', 'GBP', 'CHF', 'PLN', 'CZK', 'SEK', 'NOK', 'DKK', 'TRY', 'GEL', 'AMD', 'KZT', 'UAH', 'RSD', 'AED', 'THB', 'VND'] as const
@@ -122,6 +123,16 @@ function SettingsForm({ settings }: { settings: BudgetSettings }) {
         {field('balance', t('settings.balance'), fromBank ? t('settings.balanceFromBank', { bank: bankName }) : t('settings.balanceHint'))}
         {field('dailyExpenses', t('settings.daily'), t('settings.dailyHint'))}
       </Card>
+
+      {!demo && (
+        <RealityCard
+          settings={settings}
+          onAccept={(perDay) => {
+            setValues((v) => ({ ...v, dailyExpenses: centsToInput(perDay, locale) }))
+            update.mutate({ dailyExpenses: perDay }, { onSuccess: () => setSavedField('dailyExpenses') })
+          }}
+        />
+      )}
 
       <Card className="flex flex-col gap-4 p-4">
         {field('warningBalance', t('settings.warning'))}

@@ -3,7 +3,10 @@ import { Link } from '@tanstack/react-router'
 import { dayOfMonth, monthKey, todayIso, type IsoDate } from '../../domain/dates.ts'
 import { dailyBalances, forecast, lowestUntilNextIncome, type ForecastPoint, type Level } from '../../domain/forecast.ts'
 import { isSingleDay, signedAmount, type BudgetRecord, type BudgetSettings } from '../../domain/records.ts'
-import { useRecords, useSettings } from '../../data/queries.ts'
+import { useBalanceSnapshots, useRecords, useSettings } from '../../data/queries.ts'
+import { realityCheck, suggestDailyExpenses } from '../../domain/reality.ts'
+import { useSession } from '../../data/session.ts'
+import { isDemoEmail } from '../../data/demo.ts'
 import { useBankAutoRefresh, useBankStatus } from '../../data/bank.ts'
 import { useI18n } from '../../i18n.ts'
 import { money, monthTitle, shortDate, timeAgo, weekdayShort } from '../../lib/format.ts'
@@ -48,6 +51,13 @@ function Home({ settings, records }: { settings: BudgetSettings; records: Budget
   const conn = bank.data?.connection ?? null
   // the server switches the balance back to manual when consent expires: say so instead of "reconcile"
   const bankExpired = conn?.status === 'expired'
+  const session = useSession()
+  const demo = !session || isDemoEmail(session.user.email)
+  const snapshots = useBalanceSnapshots(!demo)
+  const realDaily = useMemo(() => {
+    if (!snapshots.data) return null
+    return suggestDailyExpenses(realityCheck({ today, snapshots: snapshots.data, records }), settings.dailyExpenses)
+  }, [snapshots.data, today, records, settings.dailyExpenses])
 
   const { f, series, lowest } = useMemo(() => {
     const input = { today, settings, records }
@@ -157,6 +167,14 @@ function Home({ settings, records }: { settings: BudgetSettings; records: Budget
               {gi === 0 && settings.dailyExpenses > 0 && (
                 <span className="text-right text-[13px] text-muted">
                   {t('home.dailyIncluded', { amount: money(-settings.dailyExpenses, cur, locale) })}
+                  {realDaily !== null && (
+                    <>
+                      {' · '}
+                      <Link to="/settings" className="font-medium text-accent no-underline">
+                        {t('home.dailyReal', { amount: money(realDaily, cur, locale) })}
+                      </Link>
+                    </>
+                  )}
                 </span>
               )}
             </div>

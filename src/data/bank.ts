@@ -110,6 +110,7 @@ export function useBankAction<P extends Record<string, unknown>, R = unknown>(ac
     onSettled: () => {
       void qc.invalidateQueries({ queryKey: bankKeys.status })
       void qc.invalidateQueries({ queryKey: queryKeys.settings })
+      void qc.invalidateQueries({ queryKey: queryKeys.snapshots })
     },
   })
 }
@@ -169,6 +170,7 @@ export function useBankAutoRefresh(enabled: boolean) {
       .then((r) => {
         if (r.status === 'updated' || r.status === 'error') {
           void qc.invalidateQueries({ queryKey: queryKeys.settings })
+          void qc.invalidateQueries({ queryKey: queryKeys.snapshots })
           void qc.invalidateQueries({ queryKey: bankKeys.status })
         }
       })

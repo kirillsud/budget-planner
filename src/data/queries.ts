@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { BudgetRecord, BudgetSettings, NewBudgetRecord } from '../domain/records.ts'
+import type { BalanceSnapshot } from '../domain/reality.ts'
+import { todayIso } from '../domain/dates.ts'
 import type { Database } from './database.types.ts'
 import { supabase } from './supabase.ts'
 
@@ -9,6 +11,7 @@ type SettingsRow = Database['public']['Tables']['settings']['Row']
 export const queryKeys = {
   settings: ['settings'] as const,
   records: ['records'] as const,
+  snapshots: ['balance-snapshots'] as const,
 }
 
 function toRecord(row: RecordRow): BudgetRecord {
@@ -77,7 +80,10 @@ export function useUpdateSettings() {
       if (error) throw error
       return toSettings(data)
     },
-    onSuccess: (settings) => qc.setQueryData(queryKeys.settings, settings),
+    onSuccess: (settings) => {
+      qc.setQueryData(queryKeys.settings, settings)
+      void qc.invalidateQueries({ queryKey: queryKeys.snapshots })
+    },
   })
 }
 
@@ -185,5 +191,23 @@ export function useStopSeriesFrom() {
       if (error) throw error
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.records }),
+  })
+}
+
+/** Balance history of the last ~month, oldest first, on the user's local dates. */
+export function useBalanceSnapshots(enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.snapshots,
+    enabled,
+    queryFn: async (): Promise<BalanceSnapshot[]> => {
+      const since = new Date(Date.now() - 32 * 86_400_000).toISOString()
+      const { data, error } = await supabase
+        .from('balance_snapshots')
+        .select('balance, observed_at')
+        .gte('observed_at', since)
+        .order('observed_at', { ascending: true })
+      if (error) throw error
+      return data.map((row) => ({ date: todayIso(new Date(row.observed_at)), balance: row.balance }))
+    },
   })
 }
