@@ -25,6 +25,8 @@ export type Database = {
           deleted_at: string | null
           id: number
           legacy_id: number | null
+          series_id: number | null
+          series_index: number | null
           title: string
           type: Database["public"]["Enums"]["record_type"]
           updated_at: string
@@ -39,6 +41,8 @@ export type Database = {
           deleted_at?: string | null
           id?: never
           legacy_id?: number | null
+          series_id?: number | null
+          series_index?: number | null
           title: string
           type: Database["public"]["Enums"]["record_type"]
           updated_at?: string
@@ -53,6 +57,55 @@ export type Database = {
           deleted_at?: string | null
           id?: never
           legacy_id?: number | null
+          series_id?: number | null
+          series_index?: number | null
+          title?: string
+          type?: Database["public"]["Enums"]["record_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_records_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "budget_series"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_series: {
+        Row: {
+          amount: number
+          created_at: string
+          ends_on: string | null
+          first_date: string
+          id: number
+          period_days: number
+          title: string
+          type: Database["public"]["Enums"]["record_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          ends_on?: string | null
+          first_date: string
+          id?: never
+          period_days?: number
+          title: string
+          type: Database["public"]["Enums"]["record_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          ends_on?: string | null
+          first_date?: string
+          id?: never
+          period_days?: number
           title?: string
           type?: Database["public"]["Enums"]["record_type"]
           updated_at?: string
@@ -104,7 +157,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      repeat_monthly: { Args: { p_record_id: number }; Returns: number }
+      stop_series_from: { Args: { p_record_id: number }; Returns: undefined }
+      update_series_from: {
+        Args: {
+          p_amount: number
+          p_date_from: string
+          p_date_to: string
+          p_record_id: number
+          p_title: string
+          p_type: Database["public"]["Enums"]["record_type"]
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       record_type: "income" | "expense"

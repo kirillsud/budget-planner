@@ -1,9 +1,9 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { addDays, addMonths, isIsoDate, type IsoDate } from '../../domain/dates.ts'
+import { addDays, addMonths, diffDays, isIsoDate, type IsoDate } from '../../domain/dates.ts'
 import { lowestUntilNextIncome } from '../../domain/forecast.ts'
 import { centsToInput, parseAmount } from '../../domain/money.ts'
 import type { BudgetRecord, BudgetSettings, NewBudgetRecord, RecordType } from '../../domain/records.ts'
-import { useDeleteRecord, useSaveRecord } from '../../data/queries.ts'
+import { useDeleteRecord, useRepeatMonthly, useSaveRecord, useStopSeriesFrom, useUpdateSeriesFrom } from '../../data/queries.ts'
 import { useI18n } from '../../i18n.ts'
 import { money, shortDate } from '../../lib/format.ts'
 import { Button, Chip, Sheet, TextField, icons } from '../../components/ui.tsx'
@@ -43,6 +43,10 @@ function RecordForm({ state, onClose, onChange, records, settings, today }: Prop
   const { t, locale } = useI18n()
   const save = useSaveRecord()
   const remove = useDeleteRecord()
+  const repeatMonthly = useRepeatMonthly()
+  const updateSeries = useUpdateSeriesFrom()
+  const stopSeries = useStopSeriesFrom()
+  const inSeries = state.mode === 'edit' && Boolean(state.record.seriesId)
 
   const initial: NewBudgetRecord =
     state.mode === 'edit'
@@ -64,6 +68,10 @@ function RecordForm({ state, onClose, onChange, records, settings, today }: Prop
   const [dateTo, setDateTo] = useState<IsoDate>(initial.dateTo)
   const [isPeriod, setIsPeriod] = useState(initial.dateFrom !== initial.dateTo)
   const [submitted, setSubmitted] = useState(false)
+  /** New or one-off record: turn it into a monthly series on save. */
+  const [repeat, setRepeat] = useState(false)
+  /** Month of a series: also change the later months. */
+  const [applyToFollowing, setApplyToFollowing] = useState(false)
 
   const amount = parseAmount(amountText)
   const effectiveTo = isPeriod ? dateTo : dateFrom
@@ -73,6 +81,8 @@ function RecordForm({ state, onClose, onChange, records, settings, today }: Prop
     period: isPeriod && dateTo < dateFrom ? t('record.errorPeriod') : undefined,
   }
   const valid = !errors.title && !errors.amount && !errors.period && isIsoDate(dateFrom) && isIsoDate(effectiveTo)
+  // a monthly series cannot have months that overlap
+  const periodTooLongToRepeat = isIsoDate(dateFrom) && isIsoDate(effectiveTo) && diffDays(dateFrom, effectiveTo) > 27
 
   const nextIncome = useMemo(
     () => lowestUntilNextIncome({ today, settings, records })?.nextIncomeDate ?? null,
@@ -126,7 +136,19 @@ function RecordForm({ state, onClose, onChange, records, settings, today }: Prop
     e.preventDefault()
     setSubmitted(true)
     if (!valid) return
-    await save.mutateAsync(payload())
+    if (inSeries && applyToFollowing && state.mode === 'edit') {
+      await updateSeries.mutateAsync({ ...payload(), id: state.record.id })
+    } else {
+      const saved = await save.mutateAsync(payload())
+      if (!inSeries && repeat && !periodTooLongToRepeat) await repeatMonthly.mutateAsync(saved.id)
+    }
+    onClose()
+  }
+
+  async function stopRepeating() {
+    if (state.mode !== 'edit') return
+    if (!window.confirm(t('record.stopConfirm', { title: state.record.title }))) return
+    await stopSeries.mutateAsync(state.record.id)
     onClose()
   }
 
@@ -143,17 +165,21 @@ function RecordForm({ state, onClose, onChange, records, settings, today }: Prop
     onClose()
   }
 
-  function copyNextMonth() {
-    onChange({
-      mode: 'new',
+  /** One tap: saves a copy one month later and opens it, so it can be adjusted right away. */
+  async function copyNextMonth() {
+    if (!valid) {
+      setSubmitted(true)
+      return
+    }
+    const copy = await save.mutateAsync({
       type,
-      draft: {
-        title: title.trim(),
-        amount: amount ?? 0,
-        dateFrom: addMonths(dateFrom, 1),
-        dateTo: addMonths(effectiveTo, 1),
-      },
+      title: title.trim(),
+      amount: amount ?? 0,
+      dateFrom: addMonths(dateFrom, 1),
+      dateTo: addMonths(effectiveTo, 1),
+      completed: false,
     })
+    onChange({ mode: 'edit', record: copy })
   }
 
   function setDay(day: IsoDate) {
@@ -161,8 +187,8 @@ function RecordForm({ state, onClose, onChange, records, settings, today }: Prop
     if (!isPeriod || dateTo < day) setDateTo(day)
   }
 
-  const busy = save.isPending || remove.isPending
-  const mutationError = save.error ?? remove.error
+  const busy = save.isPending || remove.isPending || repeatMonthly.isPending || updateSeries.isPending || stopSeries.isPending
+  const mutationError = save.error ?? remove.error ?? repeatMonthly.error ?? updateSeries.error ?? stopSeries.error
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
@@ -264,6 +290,23 @@ function RecordForm({ state, onClose, onChange, records, settings, today }: Prop
         </div>
       </fieldset>
 
+      {inSeries ? (
+        <CheckRow
+          checked={applyToFollowing}
+          onChange={setApplyToFollowing}
+          title={t('record.applyFollowing')}
+          hint={t('record.applyFollowingHint')}
+        />
+      ) : (
+        <CheckRow
+          checked={repeat && !periodTooLongToRepeat}
+          disabled={periodTooLongToRepeat}
+          onChange={setRepeat}
+          title={t('record.repeatMonthly')}
+          hint={periodTooLongToRepeat ? t('record.repeatTooLong') : t('record.repeatMonthlyHint')}
+        />
+      )}
+
       {impact && (
         <div
           role="status"
@@ -302,15 +345,51 @@ function RecordForm({ state, onClose, onChange, records, settings, today }: Prop
             <Button variant="soft" onClick={toggleDone} disabled={busy} className="px-2 text-sm">
               {state.record.completed ? t('record.markUndone') : t('record.markDone')}
             </Button>
-            <Button onClick={copyNextMonth} disabled={busy} className="px-2 text-sm">
-              {t('record.copyNextMonth')}
-            </Button>
+            {inSeries ? (
+              <Button onClick={stopRepeating} disabled={busy} className="px-2 text-sm">
+                {t('record.stopRepeat')}
+              </Button>
+            ) : (
+              <Button onClick={copyNextMonth} disabled={busy} className="px-2 text-sm">
+                {t('record.copyNextMonth')}
+              </Button>
+            )}
             <Button variant="danger" onClick={del} disabled={busy} className="px-2 text-sm">
-              {t('record.delete')}
+              {inSeries ? t('record.deleteThisMonth') : t('record.delete')}
             </Button>
           </div>
         )}
       </div>
     </form>
+  )
+}
+
+function CheckRow({
+  checked,
+  disabled,
+  onChange,
+  title,
+  hint,
+}: {
+  checked: boolean
+  disabled?: boolean
+  onChange: (value: boolean) => void
+  title: string
+  hint: string
+}) {
+  return (
+    <label className={`flex min-h-11 items-center justify-between gap-3 ${disabled ? 'opacity-60' : ''}`}>
+      <span className="flex flex-col gap-0.5">
+        <span className="text-[15px] font-medium">{title}</span>
+        <span className="text-xs text-muted">{hint}</span>
+      </span>
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+        className="size-5.5 shrink-0 accent-accent"
+      />
+    </label>
   )
 }

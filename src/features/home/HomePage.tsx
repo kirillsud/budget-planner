@@ -214,6 +214,7 @@ function DayRow({ point, settings, onOpen }: { point: ForecastPoint; settings: B
           >
             <span className="flex min-w-0 flex-col gap-1">
               <span className={`truncate text-[15px] font-medium ${r.completed ? 'line-through' : ''}`}>{r.title}</span>
+              {Boolean(r.seriesId) && <span className="text-xs text-muted">{t('record.monthly')}</span>}
               {!isSingleDay(r) && (
                 <span className="self-start rounded-md bg-accent-soft px-1.5 py-0.5 text-xs font-medium text-accent-ink">
                   {t('record.anyDay', { from: shortDate(r.dateFrom, locale), to: shortDate(r.dateTo, locale) })}

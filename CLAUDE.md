@@ -24,4 +24,7 @@ if the board is silent, ask and record the question in doc 06.
 - Currency is per account (`settings.currency`, ISO 4217), RUB by default; changeable in settings.
 - Demo account `demo@example.com` / `budget-demo` (public), reset nightly by `private.reset_demo()` via pg_cron.
   Seeded rows are keyed by `legacy_id`; never use `delete` there, reset soft-deletes and upserts.
-- Not in v1 yet: recurring records, automatic balance change on "paid", data migration from the old MySQL.
+- Monthly repeats: `budget_series` holds the rule, occurrences are normal `budget_records` rows (`series_id`,
+  `series_index`) generated ~13 months ahead by `private.extend_series()` (pg_cron daily) and by
+  `public.repeat_monthly()`. Edit later months with `public.update_series_from()`, stop with `public.stop_series_from()`.
+- Not in v1 yet: automatic balance change on "paid", data migration from the old MySQL.

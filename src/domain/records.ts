@@ -15,6 +15,8 @@ export interface BudgetRecord {
   dateFrom: IsoDate
   dateTo: IsoDate
   completed: boolean
+  /** Set when the record is one month of a monthly series. */
+  seriesId?: number | null
 }
 
 export type NewBudgetRecord = Omit<BudgetRecord, 'id'> & { id?: number }

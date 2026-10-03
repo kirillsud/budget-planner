@@ -20,6 +20,7 @@ function toRecord(row: RecordRow): BudgetRecord {
     dateFrom: row.date_from,
     dateTo: row.date_to,
     completed: row.completed,
+    seriesId: row.series_id,
   }
 }
 
@@ -140,5 +141,48 @@ export function useDeleteRecord() {
     onSuccess: (id) => {
       qc.setQueryData<BudgetRecord[]>(queryKeys.records, (old) => old?.filter((r) => r.id !== id))
     },
+  })
+}
+
+/** Turns a saved record into the first month of a monthly series; the database fills about a year ahead. */
+export function useRepeatMonthly() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (recordId: number) => {
+      const { error } = await supabase.rpc('repeat_monthly', { p_record_id: recordId })
+      if (error) throw error
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.records }),
+  })
+}
+
+/** Saves the record and applies the same values to every later month of its series that is not done yet. */
+export function useUpdateSeriesFrom() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (record: BudgetRecord) => {
+      const { error } = await supabase.rpc('update_series_from', {
+        p_record_id: record.id,
+        p_type: record.type,
+        p_title: record.title.trim(),
+        p_amount: record.amount,
+        p_date_from: record.dateFrom,
+        p_date_to: record.dateTo,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.records }),
+  })
+}
+
+/** Stops the series: this month and later ones that are not done yet are removed. */
+export function useStopSeriesFrom() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (recordId: number) => {
+      const { error } = await supabase.rpc('stop_series_from', { p_record_id: recordId })
+      if (error) throw error
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.records }),
   })
 }
