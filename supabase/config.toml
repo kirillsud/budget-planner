@@ -1,0 +1,7 @@
+# Only the settings that differ from the Supabase CLI defaults.
+project_id = "budget-planner"
+
+[functions.bank]
+# The function checks the user's JWT itself, and the pg_cron job calls it with x-cron-secret
+# instead of a JWT, so the gateway check must stay off. `supabase functions deploy bank` reads this.
+verify_jwt = false

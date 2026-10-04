@@ -56,5 +56,6 @@ Optional, per user, read-only. Every user brings their own free Enable Banking a
 2. Generate the key in the browser, download the `.pem`, link your own account in the panel as Enable Banking asks.
 3. In the planner: Settings → "Balance from your bank" → paste the application ID and the `.pem`, then pick the bank.
 
-Server side: `supabase/functions/bank` (deploy with `verify_jwt = false`; it checks the user JWT itself and the cron
+Server side: `supabase/functions/bank` (deploy with `supabase functions deploy bank --project-ref klswsqobopbttgwdnqce`;
+`verify_jwt = false` comes from `supabase/config.toml`; it checks the user JWT itself and the cron
 secret for `cron-refresh`), tables `bank_credentials` / `bank_connections`, private key in Supabase Vault.
