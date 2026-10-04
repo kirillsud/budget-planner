@@ -169,9 +169,16 @@ function SettingsForm({ settings }: { settings: BudgetSettings }) {
         />
       </Card>
 
-      {!demo && <BankCard />}
-
-      <PasswordCard />
+      {demo ? (
+        <Card className="p-4">
+          <p className="m-0 text-sm leading-relaxed text-muted">{t('demo.locked')}</p>
+        </Card>
+      ) : (
+        <>
+          <BankCard />
+          <PasswordCard />
+        </>
+      )}
 
       {update.error && (
         <p role="alert" className="rounded-2xl bg-crit-soft p-3 text-sm text-crit-ink">

@@ -200,6 +200,8 @@ async function userFrom(req: Request): Promise<string> {
   if (!token) throw new HttpError(401, 'unauthorized', 'Sign in first')
   const { data, error } = await admin.auth.getUser(token)
   if (error || !data.user) throw new HttpError(401, 'unauthorized', 'Sign in first')
+  // the public demo account must never store bank keys or connect a bank (app_metadata is writable only by the service role)
+  if (data.user.app_metadata?.demo === true) throw new HttpError(403, 'demo_readonly', 'The demo account cannot use the bank feature')
   return data.user.id
 }
 
