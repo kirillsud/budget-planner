@@ -11,6 +11,10 @@ if the board is silent, ask and record the question in doc 06.
 - Dates are ISO strings `YYYY-MM-DD`; use `src/domain/dates.ts`, never `Date` arithmetic with local time.
 - Schema changes only through a new file in `supabase/migrations`, then regenerate `src/data/database.types.ts`.
 - RLS stays enabled on every user table. Never use the service role key in the app.
+- Table grants: `anon` gets none on `public`; `authenticated` only what the app needs (never TRUNCATE; `series_id` /
+  `series_index` are written only by the security definer functions). Every `security definer` function that takes an
+  id must check the owner of that row against `auth.uid()`. `supabase/tests/rls_series.sql` checks this; run it after
+  changing policies, grants or those functions.
 - UI strings go through `useI18n().t()`; add both `ru` and `en` messages in `src/i18n.ts`.
 - Conventional Commits. Run `npm run ci` before pushing.
 
