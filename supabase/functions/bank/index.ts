@@ -195,6 +195,45 @@ function ibanTail(iban?: string | null): string | null {
   return iban ? iban.replace(/\s+/g, '').slice(-4) : null
 }
 
+/** Constant-time string comparison (both sides are hashed first, so length does not leak either). */
+async function safeEqual(a: string, b: string): Promise<boolean> {
+  const enc = new TextEncoder()
+  const [ha, hb] = await Promise.all([crypto.subtle.digest('SHA-256', enc.encode(a)), crypto.subtle.digest('SHA-256', enc.encode(b))])
+  const x = new Uint8Array(ha)
+  const y = new Uint8Array(hb)
+  let diff = 0
+  for (let i = 0; i < x.length; i++) diff |= x[i] ^ y[i]
+  return diff === 0
+}
+
+// Best-effort limit per user and function instance: it stops a signed-in user from using this function as an
+// open relay to Enable Banking, it is not a hard guarantee across instances.
+const RATE_WINDOW_MS = 60 * 1000
+const RATE_MAX = 20
+const hits = new Map<string, number[]>()
+
+function rateLimit(userId: string) {
+  const now = Date.now()
+  const recent = (hits.get(userId) ?? []).filter((t) => now - t < RATE_WINDOW_MS)
+  if (recent.length >= RATE_MAX) throw new HttpError(429, 'rate_limited', 'Too many requests, try again in a minute')
+  recent.push(now)
+  hits.set(userId, recent)
+  if (hits.size > 1000) for (const [k, v] of hits) if (v.every((t) => now - t >= RATE_WINDOW_MS)) hits.delete(k)
+}
+
+/** The bank must send the user back to this app: same origin as the caller, fixed path. */
+function checkRedirect(req: Request, redirectUrl: string) {
+  let url: URL
+  try {
+    url = new URL(redirectUrl)
+  } catch {
+    throw new HttpError(400, 'bad_request', 'Bank and redirect URL are required')
+  }
+  if (url.origin !== req.headers.get('origin') || url.pathname !== '/bank/callback' || url.search || url.hash) {
+    throw new HttpError(400, 'bad_redirect', 'The redirect URL must be this app\'s /bank/callback')
+  }
+}
+
 async function userFrom(req: Request): Promise<string> {
   const token = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '')
   if (!token) throw new HttpError(401, 'unauthorized', 'Sign in first')
@@ -271,7 +310,7 @@ async function handle(req: Request, body: any) {
 
   if (action === 'cron-refresh') {
     const { data: secret } = await admin.rpc('bank_cron_secret')
-    if (!secret || req.headers.get('x-cron-secret') !== secret) throw new HttpError(401, 'unauthorized', 'Bad cron secret')
+    if (!secret || !(await safeEqual(req.headers.get('x-cron-secret') ?? '', String(secret)))) throw new HttpError(401, 'unauthorized', 'Bad cron secret')
     const { data: conns } = await admin.from('bank_connections').select('*').eq('status', 'active')
     let ok = 0
     for (const conn of conns ?? []) if ((await refreshConnection(conn, null)).balance !== null) ok++
@@ -279,6 +318,7 @@ async function handle(req: Request, body: any) {
   }
 
   const userId = await userFrom(req)
+  rateLimit(userId)
 
   switch (action) {
     case 'save-credentials': {
@@ -329,7 +369,8 @@ async function handle(req: Request, body: any) {
       const country = String(body.country ?? 'NL').toUpperCase()
       const aspspName = String(body.aspspName ?? '')
       const redirectUrl = String(body.redirectUrl ?? '')
-      if (!aspspName || !/^https?:\/\//.test(redirectUrl)) throw new HttpError(400, 'bad_request', 'Bank and redirect URL are required')
+      if (!aspspName) throw new HttpError(400, 'bad_request', 'Bank and redirect URL are required')
+      checkRedirect(req, redirectUrl)
       const list = await eb<{ aspsps: any[] }>(creds, 'GET', `/aspsps?country=${encodeURIComponent(country)}&psu_type=personal&service=AIS`)
       const aspsp = (list.aspsps ?? []).find((a) => a.name === aspspName)
       if (!aspsp) throw new HttpError(404, 'unknown_bank', 'Bank not found')
@@ -476,6 +517,6 @@ Deno.serve(async (req) => {
   } catch (e) {
     if (e instanceof HttpError) return json({ error: e.message, code: e.code }, e.status)
     console.error(e)
-    return json({ error: e instanceof Error ? e.message : 'Internal error', code: 'internal' }, 500)
+    return json({ error: 'Internal error', code: 'internal' }, 500)
   }
 })
