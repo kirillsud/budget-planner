@@ -130,7 +130,7 @@ async function eb<T>(creds: Pick<Creds, 'token'>, method: string, path: string, 
     body: body === undefined ? undefined : JSON.stringify(body),
   })
   const text = await res.text()
-  let payload: any = null
+  let payload: Record<string, unknown> | null
   try {
     payload = text ? JSON.parse(text) : null
   } catch {
@@ -141,7 +141,7 @@ async function eb<T>(creds: Pick<Creds, 'token'>, method: string, path: string, 
     const code = res.status === 401 ? 'unauthorized' : payload?.error ?? `http_${res.status}`
     throw new HttpError(res.status === 401 || res.status === 403 ? res.status : 502, String(code), String(message))
   }
-  return payload as T
+  return payload as unknown as T
 }
 
 // ---------- helpers ----------
@@ -153,6 +153,57 @@ function toCents(amount: string): number {
   const frac = (m[3] ?? '').padEnd(3, '0')
   const cents = Number(m[2]) * 100 + Number(frac.slice(0, 2)) + (Number(frac[2]) >= 5 ? 1 : 0)
   return m[1] === '-' ? -cents : cents
+}
+
+interface EbApplication {
+  name?: string
+  redirect_urls?: string[]
+  environment?: string
+}
+
+interface EbAspsp {
+  name: string
+  country: string
+  logo?: string
+  maximum_consent_validity?: number
+}
+
+interface EbAccount {
+  uid: string
+  name?: string
+  product?: string
+  currency?: string
+  account_id?: { iban?: string }
+}
+
+interface EbSession {
+  session_id: string
+  accounts?: EbAccount[]
+  access?: { valid_until?: string }
+}
+
+/** A row of `bank_connections` (the admin client is untyped, so only the columns used here). */
+interface BankConnectionRow {
+  id: string
+  user_id: string
+  account_uid: string | null
+  valid_until: string | null
+  required_psu_headers: string[] | null
+}
+
+/** JSON body of a request to this function. */
+interface BankRequest {
+  action?: string
+  appId?: string
+  privateKey?: string
+  country?: string
+  aspspName?: string
+  redirectUrl?: string
+  state?: string
+  code?: string
+  connectionId?: string
+  accountUid?: string
+  force?: boolean
 }
 
 interface EbBalance {
@@ -252,7 +303,7 @@ async function setBalance(userId: string, cents: number) {
   if (error) throw error
 }
 
-async function refreshConnection(conn: any, req: Request | null): Promise<{ balance: number | null; error?: string }> {
+async function refreshConnection(conn: BankConnectionRow, req: Request | null): Promise<{ balance: number | null; error?: string }> {
   if (!conn.account_uid) return { balance: null }
   if (conn.valid_until && new Date(conn.valid_until).getTime() < Date.now()) {
     await admin.from('bank_connections').update({ status: 'expired' }).eq('id', conn.id)
@@ -305,7 +356,7 @@ async function activeConnection(userId: string) {
 
 // ---------- actions ----------
 
-async function handle(req: Request, body: any) {
+async function handle(req: Request, body: BankRequest) {
   const action = body?.action
 
   if (action === 'cron-refresh') {
@@ -326,9 +377,9 @@ async function handle(req: Request, body: any) {
       const privateKey = String(body.privateKey ?? '').trim()
       if (!/^[0-9a-f-]{20,64}$/i.test(appId)) throw new HttpError(400, 'bad_app_id', 'Application ID looks wrong')
       const token = await apiToken(appId, privateKey)
-      let app: any
+      let app: EbApplication
       try {
-        app = await eb<any>({ token }, 'GET', '/application')
+        app = await eb<EbApplication>({ token }, 'GET', '/application')
       } catch (e) {
         if (e instanceof HttpError && (e.status === 401 || e.status === 403)) {
           throw new HttpError(400, 'rejected', 'Enable Banking rejected this application ID and key')
@@ -358,7 +409,7 @@ async function handle(req: Request, body: any) {
     case 'aspsps': {
       const creds = await credsFor(userId)
       const country = String(body.country ?? 'NL').toUpperCase()
-      const res = await eb<{ aspsps: any[] }>(creds, 'GET', `/aspsps?country=${encodeURIComponent(country)}&psu_type=personal&service=AIS`)
+      const res = await eb<{ aspsps: EbAspsp[] }>(creds, 'GET', `/aspsps?country=${encodeURIComponent(country)}&psu_type=personal&service=AIS`)
       return {
         aspsps: (res.aspsps ?? []).map((a) => ({ name: a.name, country: a.country, logo: a.logo ?? null })),
       }
@@ -371,7 +422,7 @@ async function handle(req: Request, body: any) {
       const redirectUrl = String(body.redirectUrl ?? '')
       if (!aspspName) throw new HttpError(400, 'bad_request', 'Bank and redirect URL are required')
       checkRedirect(req, redirectUrl)
-      const list = await eb<{ aspsps: any[] }>(creds, 'GET', `/aspsps?country=${encodeURIComponent(country)}&psu_type=personal&service=AIS`)
+      const list = await eb<{ aspsps: EbAspsp[] }>(creds, 'GET', `/aspsps?country=${encodeURIComponent(country)}&psu_type=personal&service=AIS`)
       const aspsp = (list.aspsps ?? []).find((a) => a.name === aspspName)
       if (!aspsp) throw new HttpError(404, 'unknown_bank', 'Bank not found')
       const maxSeconds = Math.min(Number(aspsp.maximum_consent_validity ?? MAX_CONSENT_SECONDS), MAX_CONSENT_SECONDS)
@@ -412,8 +463,8 @@ async function handle(req: Request, body: any) {
         .maybeSingle()
       if (!conn) throw new HttpError(404, 'unknown_state', 'This bank link is not valid any more, start again')
       const creds = await credsFor(userId)
-      const session = await eb<any>(creds, 'POST', '/sessions', { code })
-      const accounts = (session.accounts ?? []).map((a: any) => ({
+      const session = await eb<EbSession>(creds, 'POST', '/sessions', { code })
+      const accounts = (session.accounts ?? []).map((a) => ({
         uid: a.uid,
         name: a.name ?? a.product ?? null,
         ibanTail: ibanTail(a.account_id?.iban),
@@ -455,7 +506,7 @@ async function handle(req: Request, body: any) {
         .in('status', ['choose_account', 'active'])
         .maybeSingle()
       if (!conn) throw new HttpError(404, 'not_found', 'Connection not found')
-      const account = (conn.accounts ?? []).find((a: any) => a.uid === body.accountUid)
+      const account = (conn.accounts ?? []).find((a: { uid: string }) => a.uid === body.accountUid)
       if (!account) throw new HttpError(400, 'bad_account', 'Account not found')
       const { data: updated, error } = await admin
         .from('bank_connections')
