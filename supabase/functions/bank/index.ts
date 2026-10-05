@@ -130,7 +130,7 @@ async function eb<T>(creds: Pick<Creds, 'token'>, method: string, path: string, 
     body: body === undefined ? undefined : JSON.stringify(body),
   })
   const text = await res.text()
-  let payload: any = null
+  let payload: any
   try {
     payload = text ? JSON.parse(text) : null
   } catch {
