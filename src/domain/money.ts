@@ -7,7 +7,7 @@ export type Cents = number
  * Returns null for empty or invalid input.
  */
 export function parseAmount(input: string): Cents | null {
-  const cleaned = input.replace(/[\s  €$£₽]/g, '')
+  const cleaned = input.replace(/[\s\u00a0\u202f€$£₽]/g, '')
   if (cleaned === '' || /[^\d.,-]/.test(cleaned)) return null
   const negative = cleaned.startsWith('-')
   const body = negative ? cleaned.slice(1) : cleaned
